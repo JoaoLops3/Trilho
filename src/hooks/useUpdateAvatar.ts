@@ -16,7 +16,6 @@ export function useUpdateAvatar(): UseUpdateAvatarResult {
       try {
         setProfile({ ...profile, avatarSeed: seed, avatarStyle: style });
         captureEvent("avatar updated", {
-          avatar_seed: seed,
           avatar_style: style,
           synced_to_cloud: isAuthenticated,
         });

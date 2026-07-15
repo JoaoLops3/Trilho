@@ -1,5 +1,6 @@
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "../types/database";
+import { authStorage } from "./secure-auth-storage";
 
 const url = import.meta.env.VITE_SUPABASE_URL as string | undefined;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined;
@@ -40,6 +41,7 @@ export function getSupabase(): SupabaseClient<Database> | null {
         persistSession: true,
         detectSessionInUrl: true,
         autoRefreshToken: true,
+        storage: authStorage,
       },
     });
   }
