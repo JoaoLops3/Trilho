@@ -5,6 +5,7 @@ export type LeadMinutes = 5 | 10 | 15;
 
 export interface NotificationPreferences {
   leadMinutes: LeadMinutes;
+  hideTaskContent: boolean;
   enabled: Record<NotificationType, boolean>;
 }
 
@@ -35,8 +36,21 @@ export const INBOX_NOTIFICATION_TYPES: NotificationType[] = [
   "streak_milestone",
 ];
 
+export const NOTIFICATION_TYPE_HINTS: Partial<
+  Record<NotificationType, string>
+> = {
+  task_upcoming: "Celular — antes do horário agendado",
+  task_overdue: "Celular — quando passa do horário sem iniciar",
+  timer_finished: "Celular — quando o timer de foco termina",
+  streak_at_risk: "Celular — à noite, se a sequência estiver em risco",
+  task_completed: "Central in-app",
+  daily_goal_reached: "Central in-app",
+  streak_milestone: "Central in-app",
+};
+
 export const DEFAULT_PREFERENCES: NotificationPreferences = {
   leadMinutes: 10,
+  hideTaskContent: false,
   enabled: {
     task_upcoming: true,
     task_completed: true,
@@ -61,6 +75,10 @@ export function loadPreferences(): NotificationPreferences {
       leadMinutes: isLeadMinutes(parsed.leadMinutes)
         ? parsed.leadMinutes
         : DEFAULT_PREFERENCES.leadMinutes,
+      hideTaskContent:
+        typeof parsed.hideTaskContent === "boolean"
+          ? parsed.hideTaskContent
+          : DEFAULT_PREFERENCES.hideTaskContent,
       enabled: {
         ...DEFAULT_PREFERENCES.enabled,
         ...(parsed.enabled ?? {}),

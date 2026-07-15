@@ -20,6 +20,7 @@ import { SyncProvider } from "./lib/sync-context";
 import { ProfileProvider } from "./lib/profile-context";
 import { NotificationsProvider } from "./lib/notifications-context";
 import { ImportLocalDataSheet } from "./components/ImportLocalDataSheet";
+import { NotificationPermissionSheet } from "./components/NotificationPermissionSheet";
 import { syncNativeSchedulesFromStorage } from "./lib/native-notifications";
 import { handleAuthDeepLink } from "./lib/auth-deeplink";
 import { captureException } from "./lib/posthog";
@@ -140,6 +141,7 @@ function AppRoutes() {
       <GlobalTaskSheet />
       <NativeNotificationBridge />
       <ImportLocalDataSheet />
+      <NotificationPermissionSheet />
     </>
   );
 }

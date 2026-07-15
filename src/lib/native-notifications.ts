@@ -3,6 +3,11 @@ import {
   LocalNotifications,
   type PermissionStatus,
 } from "@capacitor/local-notifications";
+import {
+  AndroidSettings,
+  IOSSettings,
+  NativeSettings,
+} from "capacitor-native-settings";
 import type { Task } from "../components/TaskCard";
 import type { NotificationType } from "../types/notification";
 import {
@@ -27,6 +32,7 @@ import {
   timerFinishedDedupKey,
 } from "./notification-copy";
 import type { NewNotification } from "./notification-storage";
+import { loadNotifications } from "./notification-storage";
 import { computeStreak, dayKey, loadHistory } from "./day-stats";
 import {
   getStreakAtRiskScheduleAt,
@@ -86,6 +92,18 @@ export async function requestNotificationPermission(): Promise<NotificationPermi
   }
 }
 
+export async function openSystemNotificationSettings(): Promise<void> {
+  if (!isNative()) return;
+  try {
+    await NativeSettings.open({
+      optionAndroid: AndroidSettings.ApplicationDetails,
+      optionIOS: IOSSettings.App,
+    });
+  } catch {
+    // Falha ao abrir configurações: usuário pode abrir manualmente.
+  }
+}
+
 export async function cancelTaskNotifications(
   taskId: string,
   date: Date = new Date(),
@@ -105,9 +123,11 @@ function buildNativePayloads(
   tasks: Task[],
   prefs: NotificationPreferences,
   now: Date,
+  inboxDedupKeys: Set<string>,
 ): NativeNotificationPayload[] {
   const payloads: NativeNotificationPayload[] = [];
   const minScheduleMs = now.getTime() + 5_000;
+  const copyOptions = { hideTaskContent: prefs.hideTaskContent };
 
   for (const task of tasks) {
     if (
@@ -121,7 +141,7 @@ function buildNativePayloads(
           scheduled.getTime() - prefs.leadMinutes * 60_000,
         );
         if (upcomingAt.getTime() >= minScheduleMs) {
-          const copy = buildTaskUpcomingCopy(task);
+          const copy = buildTaskUpcomingCopy(task, copyOptions);
           payloads.push({
             id: nativeNotificationId("task_upcoming", task.id, now),
             title: copy.title,
@@ -146,11 +166,15 @@ function buildNativePayloads(
     ) {
       const scheduled = scheduledDateToday(task.scheduledTime, now);
       if (scheduled) {
+        const overdueDedupKey = taskOverdueDedupKey(task.id, now);
+        if (inboxDedupKeys.has(overdueDedupKey)) {
+          continue;
+        }
         const overdueAt =
           scheduled.getTime() >= minScheduleMs
             ? scheduled
             : new Date(minScheduleMs);
-        const copy = buildTaskOverdueCopy(task);
+        const copy = buildTaskOverdueCopy(task, copyOptions);
         payloads.push({
           id: nativeNotificationId("task_overdue", task.id, now),
           title: copy.title,
@@ -170,7 +194,7 @@ function buildNativePayloads(
     if (task.status === "active" && prefs.enabled.timer_finished) {
       const finishAt = getTimerFinishAt(task, now);
       if (finishAt && finishAt.getTime() >= minScheduleMs) {
-        const copy = buildTimerFinishedCopy(task);
+        const copy = buildTimerFinishedCopy(task, copyOptions);
         payloads.push({
           id: nativeNotificationId("timer_finished", task.id, now),
           title: copy.title,
@@ -223,7 +247,10 @@ export async function syncNativeSchedules(
   if (permission !== "granted") return;
 
   try {
-    const desired = buildNativePayloads(tasks, prefs, now);
+    const inboxDedupKeys = new Set(
+      loadNotifications().map((notification) => notification.dedupKey),
+    );
+    const desired = buildNativePayloads(tasks, prefs, now, inboxDedupKeys);
     const desiredIds = new Set(desired.map((item) => item.id));
 
     const pending = await LocalNotifications.getPending();
