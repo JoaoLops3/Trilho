@@ -7,7 +7,7 @@ import { AppLogo } from "../components/AppLogo";
 import { AuthFormField } from "../components/AuthFormField";
 import { useAuth } from "../lib/auth-context";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
-import { APP_NAME, APP_TAGLINE } from "../lib/app-brand";
+import { APP_NAME, APP_TAGLINE, APP_VERSION } from "../lib/app-brand";
 import {
   validateDisplayName,
   validateEmail,
@@ -347,6 +347,10 @@ export function LoginScreen() {
                 </form>
               </motion.div>
             )}
+
+            <p className="mt-6 text-center text-xs text-obsidian-500">
+              Versão {APP_VERSION}
+            </p>
           </div>
         </div>
       </IonContent>

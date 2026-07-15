@@ -29,6 +29,7 @@ import {
 import { useAuth } from "../lib/auth-context";
 import { useSync } from "../lib/sync-context";
 import { tabNavigationState } from "../lib/tab-navigation";
+import { APP_VERSION } from "../lib/app-brand";
 
 interface SettingsRowProps {
   icon: LucideIcon;
@@ -264,6 +265,9 @@ export function ProfileScreen() {
                   }}
                 />
               </div>
+              <p className="mt-3 text-center text-xs text-obsidian-500">
+                Versão {APP_VERSION}
+              </p>
             </motion.section>
 
             <motion.section
