@@ -4,7 +4,10 @@ import {
   DEFAULT_PREFERENCES,
   type NotificationPreferences,
 } from "../notification-preferences";
-import { DEFAULT_DAILY_GOAL_MINUTES, mergeDailyGoalMinutes } from "../daily-goal";
+import {
+  DEFAULT_DAILY_GOAL_MINUTES,
+  mergeDailyGoalMinutes,
+} from "../daily-goal";
 import { loadProfile } from "../profile-storage";
 import { getSupabase } from "../supabase";
 import { pruneCompletedTasks } from "../storage";
@@ -29,6 +32,8 @@ function mergePreferences(
   if (!partial) return DEFAULT_PREFERENCES;
   return {
     leadMinutes: partial.leadMinutes ?? DEFAULT_PREFERENCES.leadMinutes,
+    hideTaskContent:
+      partial.hideTaskContent ?? DEFAULT_PREFERENCES.hideTaskContent,
     enabled: {
       ...DEFAULT_PREFERENCES.enabled,
       ...(partial.enabled ?? {}),

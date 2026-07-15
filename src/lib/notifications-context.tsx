@@ -166,16 +166,17 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
     const currentTasks = tasksRef.current;
     const currentStreak = streakRef.current;
     const prefs = preferencesRef.current;
+    const copyOptions = { hideTaskContent: prefs.hideTaskContent };
 
     if (prefs.enabled.task_upcoming) {
       getUpcomingTaskReminders(currentTasks, now, prefs.leadMinutes).forEach(
-        (task) => push(buildTaskUpcomingEntry(task, now)),
+        (task) => push(buildTaskUpcomingEntry(task, now, copyOptions)),
       );
     }
 
     if (prefs.enabled.task_overdue) {
       getOverdueTasks(currentTasks, now).forEach((task) =>
-        push(buildTaskOverdueEntry(task, now)),
+        push(buildTaskOverdueEntry(task, now, copyOptions)),
       );
     }
 
@@ -231,7 +232,11 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       ) {
         knownCompletedRef.current.add(task.id);
         if (timerCompletedViaTimerRef.current.has(task.id)) return;
-        push(buildTaskCompletedEntry(task));
+        push(
+          buildTaskCompletedEntry(task, {
+            hideTaskContent: preferencesRef.current.hideTaskContent,
+          }),
+        );
       }
     });
   }, [tasks, push]);
@@ -246,7 +251,11 @@ export function NotificationsProvider({ children }: { children: ReactNode }) {
       ) {
         knownTimerFinishedRef.current.add(task.id);
         timerCompletedViaTimerRef.current.add(task.id);
-        push(buildTimerFinishedEntry(task));
+        push(
+          buildTimerFinishedEntry(task, {
+            hideTaskContent: preferencesRef.current.hideTaskContent,
+          }),
+        );
       }
     });
   }, [tasks, push, preferences.enabled.timer_finished]);

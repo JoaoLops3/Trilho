@@ -6,6 +6,7 @@ export const STORAGE_KEYS = {
   profile: `${PREFIX}:profile`,
   notifications: `${PREFIX}:notifications`,
   notificationPreferences: `${PREFIX}:notification-preferences`,
+  notificationPermissionPromptSeen: `${PREFIX}:notification-permission-prompt-seen`,
   lastFocusDay: `${PREFIX}:last-focus-day`,
 } as const;
 
@@ -18,6 +19,8 @@ export const LEGACY_STORAGE_KEYS: Record<keyof typeof STORAGE_KEYS, string> = {
   profile: "app-rotina:profile",
   notifications: "app-rotina:notifications",
   notificationPreferences: "app-rotina:notification-preferences",
+  notificationPermissionPromptSeen:
+    "app-rotina:notification-permission-prompt-seen",
   lastFocusDay: "app-rotina:last-focus-day",
 };
 

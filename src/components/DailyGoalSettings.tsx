@@ -1,4 +1,5 @@
 import { motion } from "../lib/motion";
+import { Check } from "lucide-react";
 import {
   DAILY_GOAL_PRESETS,
   formatDailyGoalLabel,
@@ -43,20 +44,26 @@ export function DailyGoalSettings() {
       </div>
       <div className="card-glass p-5 space-y-3">
         <div className="flex flex-wrap gap-2">
-          {DAILY_GOAL_PRESETS.map((minutes) => (
-            <button
-              key={minutes}
-              type="button"
-              onClick={() => handleSelect(minutes)}
-              className={`min-w-[3.25rem] flex-1 rounded-2xl py-2.5 text-sm font-medium transition-colors touch-manipulation ${
-                profile.dailyGoalMinutes === minutes
-                  ? "bg-mint-500/20 text-mint-400 border border-mint-500/30"
-                  : "bg-white/[0.04] text-obsidian-300 border border-white/10 hover:bg-white/[0.08]"
-              }`}
-            >
-              {formatDailyGoalLabel(minutes)}
-            </button>
-          ))}
+          {DAILY_GOAL_PRESETS.map((minutes) => {
+            const selected = profile.dailyGoalMinutes === minutes;
+            return (
+              <button
+                key={minutes}
+                type="button"
+                onClick={() => handleSelect(minutes)}
+                className={`min-w-[3.25rem] flex flex-1 items-center justify-center gap-1.5 rounded-2xl py-2.5 text-sm font-medium transition-colors touch-manipulation ${
+                  selected
+                    ? "bg-mint-500/20 text-mint-400 border border-mint-500/60"
+                    : "bg-white/[0.04] text-obsidian-300 border border-white/10 hover:bg-white/[0.08]"
+                }`}
+              >
+                {selected ? (
+                  <Check className="h-3.5 w-3.5 shrink-0" strokeWidth={2.5} />
+                ) : null}
+                {formatDailyGoalLabel(minutes)}
+              </button>
+            );
+          })}
         </div>
       </div>
     </motion.section>

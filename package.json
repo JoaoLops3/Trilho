@@ -27,6 +27,7 @@
     "@ionic/react-router": "^8.8.10",
     "@posthog/react": "^1.10.2",
     "@supabase/supabase-js": "^2.108.2",
+    "capacitor-native-settings": "^8.1.0",
     "framer-motion": "^12.40.0",
     "lucide-react": "^0.344.0",
     "posthog-js": "^1.389.0",

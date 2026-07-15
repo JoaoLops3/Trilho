@@ -21,18 +21,21 @@ import {
   recordToday,
   saveHistory,
 } from "./day-stats";
-import {
-  loadLastFocusDay,
-  rolloverTasksIfNewDay,
-} from "./day-rollover";
+import { loadLastFocusDay, rolloverTasksIfNewDay } from "./day-rollover";
 import { captureEvent } from "./posthog";
 import { taskAnalyticsProps } from "./analytics-task";
 import { useAuth } from "./auth-context";
 import { useSync } from "./sync-context";
 import {
   cancelTaskNotifications,
+  checkNotificationPermission,
   requestNotificationPermission,
+  syncNativeSchedulesFromStorage,
 } from "./native-notifications";
+import {
+  hasSeenNotificationPermissionPrompt,
+  markNotificationPermissionPromptSeen,
+} from "./notification-permission-prompt";
 
 interface ActiveSession {
   taskId: string;
@@ -81,6 +84,9 @@ interface TasksContextValue {
   editTask: (id: string) => void;
   closeTaskSheet: () => void;
   submitTask: (task: Task) => void;
+  notificationPermissionPromptOpen: boolean;
+  dismissNotificationPermissionPrompt: () => void;
+  confirmNotificationPermissionPrompt: () => Promise<void>;
   deleteTask: (id: string) => void;
   changeStatus: (id: string, status: TaskStatus) => void;
   /**
@@ -126,6 +132,10 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   const [streak, setStreak] = useState(() => computeStreak(loadHistory()));
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [
+    notificationPermissionPromptOpen,
+    setNotificationPermissionPromptOpen,
+  ] = useState(false);
   const { isAuthenticated } = useAuth();
   const {
     registerSyncHandlers,
@@ -136,8 +146,7 @@ export function TasksProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     registerSyncHandlers({
-      applyTasks: (nextTasks) =>
-        setTasks(rolloverTasksIfNewDay(nextTasks)),
+      applyTasks: (nextTasks) => setTasks(rolloverTasksIfNewDay(nextTasks)),
       applyHistory: (history) => {
         saveHistory(history);
         setStreak(computeStreak(history));
@@ -344,9 +353,7 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   }, [tasks]);
 
   const submitTask = useCallback((task: Task) => {
-    if (task.scheduledTime) {
-      void requestNotificationPermission();
-    }
+    const isEditing = editingTaskIdRef.current !== null;
 
     if (editingTaskIdRef.current) {
       setTasks((prev) => prev.map((t) => (t.id === task.id ? task : t)));
@@ -355,6 +362,33 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     }
     setTasks((prev) => [...prev, task]);
     captureEvent("task created", taskAnalyticsProps(task));
+
+    if (
+      task.scheduledTime &&
+      !isEditing &&
+      Capacitor.isNativePlatform() &&
+      !hasSeenNotificationPermissionPrompt()
+    ) {
+      void checkNotificationPermission().then((permission) => {
+        if (permission === "prompt") {
+          setNotificationPermissionPromptOpen(true);
+        }
+      });
+    }
+  }, []);
+
+  const dismissNotificationPermissionPrompt = useCallback(() => {
+    markNotificationPermissionPromptSeen();
+    setNotificationPermissionPromptOpen(false);
+  }, []);
+
+  const confirmNotificationPermissionPrompt = useCallback(async () => {
+    markNotificationPermissionPromptSeen();
+    setNotificationPermissionPromptOpen(false);
+    const permission = await requestNotificationPermission();
+    if (permission === "granted") {
+      void syncNativeSchedulesFromStorage(tasksRef.current);
+    }
   }, []);
 
   const openNewTask = useCallback(() => {
@@ -442,6 +476,9 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       editTask,
       closeTaskSheet,
       submitTask,
+      notificationPermissionPromptOpen,
+      dismissNotificationPermissionPrompt,
+      confirmNotificationPermissionPrompt,
       deleteTask,
       changeStatus,
       getLiveElapsed,
@@ -455,6 +492,9 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       editTask,
       closeTaskSheet,
       submitTask,
+      notificationPermissionPromptOpen,
+      dismissNotificationPermissionPrompt,
+      confirmNotificationPermissionPrompt,
       deleteTask,
       changeStatus,
       getLiveElapsed,
