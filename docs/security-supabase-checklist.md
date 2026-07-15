@@ -50,7 +50,54 @@ Regras obrigatórias antes de merge na `main` e antes de releases com dados na n
 | Item | Severidade | Ação |
 |------|------------|------|
 | PostHog `task_title` em eventos | ~~MEDIUM~~ **Resolvido** | Usar `taskAnalyticsProps()` (`task_id` + metadados não-PII) |
+| PostHog `avatar_seed` em eventos | ~~LOW~~ **Resolvido** | Removido de `useUpdateAvatar`; só `avatar_style` + `synced_to_cloud` |
+| Sessão Auth em localStorage (nativo) | ~~MEDIUM~~ **Resolvido** | `authStorage` em `src/lib/secure-auth-storage.ts` (Keychain/Keystore) |
 | Dados locais em guest | INFO | `localStorage` legível no device — aceitável sem conta |
+
+## Validação de input no Postgres
+
+| Campo | Constraint | Espelha front |
+|-------|------------|---------------|
+| `profiles.display_name` | 2–50 chars | `validateDisplayName()` |
+| `profiles.nickname` | null ou 2–20 chars | `PROFILE_HEADER_NAME_MAX_LENGTH` |
+| `profiles.daily_goal_minutes` | 15–720 | presets em `daily-goal.ts` |
+| `tasks.title` | 1–120 chars | `NewTaskSheet` |
+| `tasks.category` | enum fixo | categorias do app |
+| Senha (Auth) | `minimum_password_length = 6` | `validatePassword()` |
+
+Migration: `supabase/migrations/20260715140000_harden_input_checks.sql`
+
+## App Store readiness (checklist consolidado)
+
+### Já OK
+
+| Item | Status |
+|------|--------|
+| Anon key only no client | ok |
+| `.env` fora do git | ok |
+| HTTPS em produção (Supabase, PostHog, DiceBear) | ok |
+| RLS em 5 tabelas + policies CRUD own-user | ok |
+| Sem policy `USING (true)` | ok |
+| Exclusão de conta (`delete_own_account` + CASCADE + wipe local) | ok |
+| Sem Edge Functions | ok |
+| PostHog sem título de tarefa / notas | ok |
+| PostHog nativo: sem session recording / autocapture | ok |
+
+### Resolvido neste PR
+
+| Item | Status |
+|------|--------|
+| JWT em secure storage (Keychain/Keystore) | ok — `@aparajita/capacitor-secure-storage` |
+| CHECK constraints no Postgres | ok — migration `harden_input_checks` |
+| PostHog sem `avatar_seed` | ok |
+
+### Manual antes da submissão (App Store Connect / Dashboard)
+
+| Item | Prioridade | Ação |
+|------|------------|------|
+| Privacy Nutrition Labels | **Crítico** | Declarar PostHog (Analytics: Product Interaction, Device ID, Diagnostics; Linked to User: Yes). Declarar Supabase como backend próprio (Contact Info, User Content). |
+| Leaked Password Protection | Desejável | Dashboard → Authentication → Password → ativar HaveIBeenPwned |
+| `npx cap sync ios` após instalar secure-storage | Importante | Rodar após merge para linkar plugin nativo |
 
 ## Gate de auditoria
 
