@@ -35,6 +35,8 @@ interface TaskCardProps {
   index: number;
   isActive?: boolean;
   highlighted?: boolean;
+  /** Layout mais denso (ex.: home sem scroll). */
+  compact?: boolean;
   onStatusChange?: (id: string, status: TaskStatus) => void;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
@@ -61,6 +63,7 @@ export const TaskCard = memo(
     index,
     isActive = false,
     highlighted = false,
+    compact = false,
     onStatusChange,
     onEdit,
     onDelete,
@@ -106,7 +109,9 @@ export const TaskCard = memo(
           ease: [0.25, 0.46, 0.45, 0.94],
         }}
         style={menuOpen ? { zIndex: 40 } : undefined}
-        className={`relative ${isActive ? "card-glass" : "card-premium"} p-5 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] touch-manipulation ${
+        className={`relative ${isActive ? "card-glass" : "card-premium"} ${
+          compact ? "p-3" : "p-5"
+        } transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] touch-manipulation ${
           highlighted
             ? "ring-2 ring-mint-400/60 ring-offset-2 ring-offset-surface-primary"
             : ""
@@ -130,7 +135,9 @@ export const TaskCard = memo(
           </div>
         )}
 
-        <div className="relative flex items-start gap-4">
+        <div
+          className={`relative flex items-start ${compact ? "gap-3" : "gap-4"}`}
+        >
           <motion.button
             whileTap={{ scale: 0.9 }}
             onClick={() => {
@@ -140,7 +147,7 @@ export const TaskCard = memo(
               captureEvent(eventName, taskAnalyticsProps(task));
               onStatusChange?.(task.id, nextStatus);
             }}
-            className={`relative w-12 h-12 rounded-2xl flex items-center justify-center transition-colors duration-200 ${isActive ? "bg-mint-500/20" : "bg-surface-tertiary hover:bg-surface-elevated"}`}
+            className={`relative ${compact ? "w-10 h-10" : "w-12 h-12"} rounded-2xl flex items-center justify-center transition-colors duration-200 ${isActive ? "bg-mint-500/20" : "bg-surface-tertiary hover:bg-surface-elevated"}`}
             style={
               isActive ? { boxShadow: "0 0 20px rgba(52, 211, 153, 0.15)" } : {}
             }
@@ -150,15 +157,21 @@ export const TaskCard = memo(
                 animate={{ scale: [1, 1.1, 1] }}
                 transition={{ duration: 2, repeat: Infinity }}
               >
-                <Zap className="w-5 h-5 text-mint-400" strokeWidth={2} />
+                <Zap
+                  className={`${compact ? "w-4 h-4" : "w-5 h-5"} text-mint-400`}
+                  strokeWidth={2}
+                />
               </motion.div>
             ) : task.status === "paused" ? (
               <RotateCcw
-                className="w-5 h-5 text-obsidian-400"
+                className={`${compact ? "w-4 h-4" : "w-5 h-5"} text-obsidian-400`}
                 strokeWidth={1.5}
               />
             ) : (
-              <Check className="w-5 h-5 text-obsidian-400" strokeWidth={2} />
+              <Check
+                className={`${compact ? "w-4 h-4" : "w-5 h-5"} text-obsidian-400`}
+                strokeWidth={2}
+              />
             )}
 
             {isActive && (
@@ -171,7 +184,9 @@ export const TaskCard = memo(
           </motion.button>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
+            <div
+              className={`flex items-center gap-2 ${compact ? "mb-1" : "mb-2"}`}
+            >
               <span
                 className={`tiny px-2 py-0.5 rounded-lg text-xs font-medium ${categoryColors[task.category] || categoryColors["Default"]}`}
               >
@@ -186,7 +201,7 @@ export const TaskCard = memo(
             </div>
 
             <h3
-              className={`font-display font-medium text-lg leading-tight tracking-tight mb-1 ${isActive ? "text-white" : "text-obsidian-200"}`}
+              className={`font-display font-medium ${compact ? "text-base" : "text-lg"} leading-tight tracking-tight mb-0.5 ${isActive ? "text-white" : "text-obsidian-200"}`}
             >
               {task.title}
             </h3>

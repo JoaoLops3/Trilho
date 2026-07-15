@@ -34,15 +34,11 @@ export function DashboardScreen() {
 
   useEffect(() => {
     if (!highlightTaskId) return;
-    const element = taskRefs.current[highlightTaskId];
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
     const timeout = setTimeout(() => {
       history.replace("/");
     }, 4000);
     return () => clearTimeout(timeout);
-  }, [highlightTaskId, history, tasks]);
+  }, [highlightTaskId, history]);
 
   const renderTaskCard = (
     task: (typeof tasks)[number],
@@ -59,6 +55,7 @@ export function DashboardScreen() {
         task={task}
         index={index}
         isActive={isActive}
+        compact
         highlighted={highlightTaskId === task.id}
         onStatusChange={changeStatus}
         onEdit={editTask}
@@ -85,6 +82,7 @@ export function DashboardScreen() {
   const upcomingTasks = sortByScheduledTime(
     tasks.filter((t) => t.status === "pending"),
   );
+  // Sem scroll: mostra até 3 próximas na home.
   const visibleUpcoming = upcomingTasks.slice(0, 3);
 
   const handleViewAllTasks = () => {
@@ -97,10 +95,14 @@ export function DashboardScreen() {
 
   return (
     <IonPage>
-      <IonContent scrollY={true} className="ion-content-custom">
+      <IonContent
+        scrollY={false}
+        forceOverscroll={false}
+        className="ion-content-custom ion-content-auth"
+      >
         <OrbBackground />
 
-        <div className="relative z-10 min-h-screen pb-32 md:mx-auto md:max-w-xl">
+        <div className="relative z-10 flex h-full flex-col overflow-hidden pb-tab-bar md:mx-auto md:max-w-xl">
           <HeaderBar
             greeting={getGreeting()}
             userName={getShownName(profile)}
@@ -108,67 +110,66 @@ export function DashboardScreen() {
             avatarStyle={profile.avatarStyle}
           />
 
-          <div className="px-4 space-y-6">
-            {/* Active session section */}
+          <div className="flex flex-col gap-3 overflow-hidden px-4 pt-1">
             {activeTask && (
               <motion.section
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="mt-2"
+                className="shrink-0"
                 ref={(el) => {
                   taskRefs.current[activeTask.id] = el;
                 }}
               >
                 <div
-                  className={`card-glass p-5 ${
+                  className={`card-glass p-3.5 ${
                     highlightTaskId === activeTask.id
                       ? "ring-2 ring-mint-400/60 ring-offset-2 ring-offset-surface-primary"
                       : ""
                   }`}
                 >
-                  <div className="flex items-center gap-5">
+                  <div className="flex items-center gap-3">
                     <ProgressRing
                       progress={sessionProgress}
-                      size={100}
-                      strokeWidth={6}
+                      size={76}
+                      strokeWidth={5}
                     >
-                      <p className="m-0 font-display font-bold text-xl text-white leading-none tabular-nums">
+                      <p className="m-0 font-display font-bold text-base text-white leading-none tabular-nums">
                         {String(Math.floor(sessionRemaining / 60)).padStart(
                           2,
                           "0",
                         )}
                         :{String(sessionRemaining % 60).padStart(2, "0")}
                       </p>
-                      <p className="m-0 mt-0.5 text-[8px] text-obsidian-500 uppercase tracking-wide leading-none whitespace-nowrap">
+                      <p className="m-0 mt-0.5 text-[7px] text-obsidian-500 uppercase tracking-wide leading-none whitespace-nowrap">
                         restando
                       </p>
                     </ProgressRing>
 
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 flex items-center gap-2">
                         <motion.span
                           animate={{
                             scale: [1, 1.3, 1],
                             opacity: [1, 0.6, 1],
                           }}
                           transition={{ duration: 2, repeat: Infinity }}
-                          className="w-2 h-2 rounded-full bg-mint-400"
+                          className="h-2 w-2 rounded-full bg-mint-400"
                         />
-                        <span className="text-xs text-mint-400 font-semibold uppercase tracking-wider">
+                        <span className="text-[10px] font-semibold uppercase tracking-wider text-mint-400">
                           Em Andamento
                         </span>
                       </div>
-                      <h2 className="font-display font-semibold text-xl text-white mb-1 truncate">
+                      <h2 className="mb-0.5 truncate font-display text-base font-semibold text-white">
                         {activeTask.title}
                       </h2>
-                      <p className="text-sm text-obsidian-400 mb-3">
+                      <p className="mb-2 text-xs text-obsidian-400">
                         Foco hoje: {focusMinutes}m / {goalHours}h
                       </p>
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => changeStatus(activeTask.id, "paused")}
-                          className="px-4 py-1.5 rounded-xl text-sm font-medium text-mint-400 bg-mint-500/10 border border-mint-500/30 hover:bg-mint-500/20 transition-colors touch-manipulation"
+                          className="rounded-xl border border-mint-500/30 bg-mint-500/10 px-3 py-1 text-xs font-medium text-mint-400 transition-colors hover:bg-mint-500/20 touch-manipulation"
                         >
                           Pausar
                         </button>
@@ -177,7 +178,7 @@ export function DashboardScreen() {
                           onClick={() =>
                             changeStatus(activeTask.id, "completed")
                           }
-                          className="px-4 py-1.5 rounded-xl text-sm font-medium text-obsidian-300 bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] transition-colors touch-manipulation"
+                          className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-obsidian-300 transition-colors hover:bg-white/[0.08] touch-manipulation"
                         >
                           Encerrar
                         </button>
@@ -188,40 +189,42 @@ export function DashboardScreen() {
               </motion.section>
             )}
 
-            {/* Upcoming tasks */}
             <motion.section
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.1 }}
+              className="shrink-0"
             >
-              <div className="flex items-center justify-between mb-3 px-1">
-                <h2 className="font-display font-semibold text-lg text-white">
+              <div className="mb-2 flex items-center justify-between px-1">
+                <h2 className="font-display text-base font-semibold text-white">
                   Próximas
                 </h2>
-                <span className="text-obsidian-500 text-sm">
+                <span className="text-sm text-obsidian-500">
                   {upcomingTasks.length} tarefas
                 </span>
               </div>
+
               {visibleUpcoming.length > 0 ? (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {visibleUpcoming.map((task, index) =>
                     renderTaskCard(task, index),
                   )}
                 </div>
               ) : (
-                <div className="card-glass flex flex-col items-center justify-center px-6 py-10 text-center">
-                  <p className="font-display font-medium text-base text-white">
+                <div className="card-glass flex flex-col items-center justify-center px-6 py-6 text-center">
+                  <p className="font-display text-base font-medium text-white">
                     Nenhuma tarefa no momento
                   </p>
-                  <p className="text-obsidian-500 text-sm mt-1">
+                  <p className="mt-1 text-sm text-obsidian-500">
                     Toque no + para criar sua primeira tarefa.
                   </p>
                 </div>
               )}
+
               <button
                 type="button"
                 onClick={handleViewAllTasks}
-                className="mt-3 w-full py-3 rounded-2xl text-sm font-medium text-mint-400 bg-white/[0.04] border border-white/10 hover:bg-white/[0.08] transition-colors touch-manipulation"
+                className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] py-2.5 text-sm font-medium text-mint-400 transition-colors hover:bg-white/[0.08] touch-manipulation"
               >
                 Ver todas
               </button>

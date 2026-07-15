@@ -16,10 +16,13 @@ export function AgendaScreen() {
 
   return (
     <IonPage>
-      <IonContent scrollY={true} className="ion-content-custom">
+      <IonContent
+        scrollY={true}
+        className="ion-content-custom ion-content-with-tab-bar"
+      >
         <OrbBackground />
 
-        <div className="relative z-10 min-h-screen pb-32 md:mx-auto md:max-w-xl">
+        <div className="relative z-10 min-h-full md:mx-auto md:max-w-xl">
           <div className="px-4 pt-safe pb-2 space-y-6">
             <motion.div
               initial={{ opacity: 0, y: -20 }}

@@ -250,6 +250,15 @@
   padding-top: calc(env(safe-area-inset-top, 0px) + 0.75rem);
 }
 
+/* Folga abaixo do conteúdo para a tab bar flutuante não cobrir a última seção. */
+.ion-content-with-tab-bar {
+  --padding-bottom: calc(7.25rem + env(safe-area-inset-bottom, 0px));
+}
+
+.pb-tab-bar {
+  padding-bottom: calc(7.25rem + env(safe-area-inset-bottom, 0px));
+}
+
 @keyframes breathe {
   0%,
   100% {

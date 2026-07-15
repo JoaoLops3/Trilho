@@ -56,24 +56,29 @@ export function StatsScreen() {
 
   return (
     <IonPage>
-      <IonContent scrollY={true} className="ion-content-custom">
+      <IonContent
+        scrollY={false}
+        forceOverscroll={false}
+        className="ion-content-custom ion-content-auth"
+      >
         <OrbBackground />
 
-        <div className="relative z-10 min-h-screen pb-32 md:mx-auto md:max-w-xl">
-          <div className="px-4 pt-safe pb-2 space-y-6">
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            >
-              <h1 className="m-0 font-display font-semibold text-2xl text-white tracking-tight">
-                Estatísticas
-              </h1>
-              <p className="text-obsidian-500 text-sm mt-1">
-                Seu progresso de hoje e dos últimos dias.
-              </p>
-            </motion.div>
+        <div className="relative z-10 flex h-full flex-col overflow-hidden px-4 pt-safe pb-tab-bar md:mx-auto md:max-w-xl">
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
+            className="shrink-0"
+          >
+            <h1 className="m-0 font-display font-semibold text-2xl text-white tracking-tight">
+              Estatísticas
+            </h1>
+            <p className="text-obsidian-500 text-sm mt-1">
+              Seu progresso de hoje e dos últimos dias.
+            </p>
+          </motion.div>
 
+          <div className="mt-4 flex shrink-0 flex-col gap-3">
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -107,12 +112,12 @@ export function StatsScreen() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="card-glass p-5"
+              className="card-glass p-4"
             >
               <h2 className="font-display font-semibold text-lg text-white mb-1">
                 Foco nos últimos 7 dias
               </h2>
-              <p className="text-obsidian-500 text-xs mb-4">
+              <p className="text-obsidian-500 text-xs mb-3">
                 Quanto mais alta, mais você focou naquele dia.
               </p>
               <FocusWeekChart

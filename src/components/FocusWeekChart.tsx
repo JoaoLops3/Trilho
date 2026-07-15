@@ -2,7 +2,7 @@ import { motion } from "../lib/motion";
 import { dayKey, type DayStat } from "../lib/day-stats";
 
 const WEEKDAY_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
-const BAR_AREA_HEIGHT_PX = 120;
+const BAR_AREA_HEIGHT_PX = 72;
 const MIN_FOCUS_BAR_HEIGHT_PX = 6;
 
 type LegendSwatch = "filled" | "today";
@@ -33,7 +33,7 @@ function ChartLegendItem({
 function ChartLegend() {
   return (
     <div
-      className="mt-4 flex flex-wrap items-center justify-center gap-x-4 gap-y-2"
+      className="mt-3 flex flex-wrap items-center justify-center gap-x-4 gap-y-1"
       aria-label="Legenda do gráfico de foco"
     >
       <ChartLegendItem swatch="filled" label="Com foco" />
@@ -97,7 +97,7 @@ export function FocusWeekChart({
           return (
             <div
               key={day.date}
-              className="flex flex-1 flex-col items-center gap-2"
+              className="flex flex-1 flex-col items-center gap-1.5"
             >
               <div
                 className="flex w-full items-end justify-center"
@@ -108,7 +108,7 @@ export function FocusWeekChart({
                     initial={{ height: 0 }}
                     animate={{ height: barHeightPx }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className={`w-full max-w-[28px] rounded-t-lg ${
+                    className={`w-full max-w-[24px] rounded-t-lg ${
                       isToday
                         ? "bg-gradient-to-t from-mint-500 to-mint-400"
                         : "bg-white/10"
@@ -132,7 +132,7 @@ export function FocusWeekChart({
       <ChartLegend />
 
       {isWeekEmpty && (
-        <p className="mt-4 text-center text-obsidian-500 text-sm">
+        <p className="mt-2 text-center text-obsidian-500 text-xs">
           Comece uma sessão de foco para preencher seu trilho
         </p>
       )}
