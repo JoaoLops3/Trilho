@@ -5,7 +5,6 @@ import autoprefixer from "autoprefixer";
 
 export default defineConfig({
   plugins: [react()],
-  // PostCSS inline: evita postcss-load-config (travava o event loop no Node 23).
   css: {
     postcss: {
       plugins: [tailwindcss(), autoprefixer()],
@@ -20,7 +19,6 @@ export default defineConfig({
       "react/jsx-dev-runtime",
       "react-dom",
       "react-dom/client",
-      // react-router v5 (CJS) — sem isso prop-types quebra o named default import
       "react-router",
       "react-router-dom",
       "prop-types",
@@ -47,12 +45,10 @@ export default defineConfig({
     ],
   },
   server: {
-    // 0.0.0.0: IPv4+IPv6 (localhost-only quebrava curl/Brave em 127.0.0.1)
     host: "0.0.0.0",
     port: 8100,
     strictPort: true,
     watch: {
-      // Capacitor sync reescreve ios/ e reiniciava o Vite no meio do optimizeDeps.
       ignored: ["**/ios/**", "**/android/**", "**/dist/**", "**/.git/**"],
     },
   },
