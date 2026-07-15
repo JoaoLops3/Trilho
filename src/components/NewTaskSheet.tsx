@@ -19,6 +19,13 @@ interface NewTaskSheetProps {
 
 const categories = ["Focus", "Criativo", "Saúde", "Entretenimento"] as const;
 
+const categoryLabels: Record<(typeof categories)[number], string> = {
+  Focus: "Foco",
+  Criativo: "Criativo",
+  Saúde: "Saúde",
+  Entretenimento: "Entretenimento",
+};
+
 const priorities: { id: TaskPriority; label: string }[] = [
   { id: "low", label: "Baixa" },
   { id: "medium", label: "Média" },
@@ -185,7 +192,7 @@ export function NewTaskSheet({
                           : "bg-white/[0.04] text-obsidian-300 border border-white/10 hover:bg-white/[0.08]"
                       }`}
                     >
-                      {cat}
+                      {categoryLabels[cat]}
                     </button>
                   ))}
                 </div>

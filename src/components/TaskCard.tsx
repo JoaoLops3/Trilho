@@ -50,7 +50,9 @@ const categoryColors: Record<string, string> = {
 };
 
 function getCategoryLabel(category: string): string {
-  return category === "Comunicação" ? "Entretenimento" : category;
+  if (category === "Focus") return "Foco";
+  if (category === "Comunicação") return "Entretenimento";
+  return category;
 }
 
 export const TaskCard = memo(
