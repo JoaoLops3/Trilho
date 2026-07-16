@@ -22,6 +22,16 @@ O app **sempre** grava local primeiro (cache offline). Quando autenticado, envia
 - Ao reabrir o app nativo, faz pull da nuvem (pode sobrescrever edições offline feitas em outro device sem sync).
 - Sem fila de writes offline além do cache local — edições offline neste aparelho são empurradas no próximo debounce se houver rede.
 
+### Histórico diário (`day_history`)
+
+- O push do histórico faz **diff + delete**: datas presentes no remoto mas ausentes localmente são removidas (mesmo padrão de `tasks`). A poda local de 90 dias, portanto, propaga para a nuvem.
+- **Exceção:** com histórico local **vazio**, o push é no-op — nada é deletado do remoto. Isso protege device novo pré-pull de apagar o histórico da conta; o pull inicial traz o histórico da nuvem.
+
+### Nome da conta (`display_name`)
+
+- `display_name` participa do push contínuo do perfil (igual ao `nickname`), com fallback para `"Alex"` se o valor local estiver vazio (check do DB exige 2–50 chars).
+- No login, o pull inicial (`pullUserSnapshot` → `applyProfile`) roda **antes** de qualquer push de perfil, então um device limpo (perfil local default `"Alex"`) não rebaixa um `display_name` real já existente na nuvem.
+
 ## O que sincroniza
 
 - Tarefas (`tasks`)

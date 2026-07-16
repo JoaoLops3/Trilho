@@ -3,9 +3,9 @@ import type { DayStat } from "../day-stats";
 import { loadHistory } from "../day-stats";
 import { loadNotifications } from "../notification-storage";
 import { loadPreferences } from "../notification-preferences";
-import { loadProfile } from "../profile-storage";
+import { DEFAULT_ACCOUNT_NAME, loadProfile } from "../profile-storage";
 import { loadTasks } from "../storage";
-import type { UserProfile } from "../../types/avatar";
+import type { AvatarStyle, UserProfile } from "../../types/avatar";
 import { DEFAULT_DAILY_GOAL_MINUTES } from "../daily-goal";
 import type { AppNotification } from "../../types/notification";
 import type {
@@ -64,6 +64,9 @@ export function profileToEditableRow(
   localImportDone: boolean,
 ): Database["public"]["Tables"]["profiles"]["Update"] {
   return {
+    // Guarda contra string vazia: o check do DB exige 2–50 chars e uma
+    // violação derrubaria o update inteiro do perfil.
+    display_name: profile.accountName.trim() || DEFAULT_ACCOUNT_NAME,
     nickname: profile.nickname,
     avatar_seed: profile.avatarSeed,
     avatar_style: profile.avatarStyle,
@@ -88,12 +91,21 @@ export function profileToRow(
   };
 }
 
+const KNOWN_AVATAR_STYLES: AvatarStyle[] = ["toon-head"];
+
+/** Valida o valor vindo do banco; desconhecido/legado cai no fallback. */
+function toAvatarStyle(value: string): AvatarStyle {
+  return (KNOWN_AVATAR_STYLES as string[]).includes(value)
+    ? (value as AvatarStyle)
+    : "toon-head";
+}
+
 export function rowToProfile(row: ProfileRow): UserProfile {
   return {
     accountName: row.display_name,
     nickname: row.nickname,
     avatarSeed: row.avatar_seed,
-    avatarStyle: "toon-head",
+    avatarStyle: toAvatarStyle(row.avatar_style),
     dailyGoalMinutes: row.daily_goal_minutes ?? DEFAULT_DAILY_GOAL_MINUTES,
   };
 }
