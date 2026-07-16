@@ -5,6 +5,7 @@ import { ChevronLeft } from "lucide-react";
 import { OrbBackground } from "../components/OrbBackground";
 import { DailyGoalSettings } from "../components/DailyGoalSettings";
 import { NotificationPreferencesForm } from "../components/NotificationPreferencesForm";
+import { AnalyticsConsentSettings } from "../components/AnalyticsConsentSettings";
 
 export function SettingsScreen() {
   const history = useHistory();
@@ -43,6 +44,8 @@ export function SettingsScreen() {
             <DailyGoalSettings />
 
             <NotificationPreferencesForm />
+
+            <AnalyticsConsentSettings />
           </div>
         </div>
       </IonContent>

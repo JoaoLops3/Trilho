@@ -6,6 +6,7 @@ import {
   Bell,
   Settings,
   Lock,
+  Shield,
   Trash2,
   LogOut,
   Flame,
@@ -254,6 +255,13 @@ export function ProfileScreen() {
                   icon={Lock}
                   label="Trocar senha"
                   onClick={() => history.push("/recuperar-senha")}
+                />
+                <SettingsRow
+                  icon={Shield}
+                  label="Política de Privacidade"
+                  onClick={() =>
+                    history.push("/privacidade", tabNavigationState("profile"))
+                  }
                 />
                 <SettingsRow
                   icon={Trash2}

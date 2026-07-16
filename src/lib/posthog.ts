@@ -1,5 +1,6 @@
 import posthog from "posthog-js";
 import { Capacitor } from "@capacitor/core";
+import { STORAGE_KEYS } from "./storage-keys";
 
 const apiKey = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
 const apiHost = import.meta.env.VITE_POSTHOG_HOST as string | undefined;
@@ -14,12 +15,53 @@ interface QueuedEvent {
   properties?: EventProperties;
 }
 
+export type AnalyticsConsent = "granted" | "denied";
+
 let initialized = false;
 let scheduled = false;
 const pendingEvents: QueuedEvent[] = [];
 
+/**
+ * Consentimento de analytics: `null` significa que o usuário ainda não
+ * respondeu — nesse caso nada é enviado ao PostHog (default privado).
+ */
+export function getAnalyticsConsent(): AnalyticsConsent | null {
+  if (typeof localStorage === "undefined") return null;
+  try {
+    const value = localStorage.getItem(STORAGE_KEYS.analyticsConsent);
+    return value === "granted" || value === "denied" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setAnalyticsConsent(granted: boolean): void {
+  try {
+    localStorage.setItem(
+      STORAGE_KEYS.analyticsConsent,
+      granted ? "granted" : "denied",
+    );
+  } catch {
+    // Storage indisponível — segue apenas com o estado em memória do PostHog.
+  }
+
+  if (granted) {
+    if (initialized) {
+      posthog.opt_in_capturing();
+    } else {
+      schedulePostHogInit();
+    }
+  } else {
+    pendingEvents.length = 0;
+    if (initialized) {
+      posthog.opt_out_capturing();
+    }
+  }
+}
+
 export function initPostHog(): void {
   if (initialized || !apiKey || typeof window === "undefined") return;
+  if (getAnalyticsConsent() !== "granted") return;
   initialized = true;
 
   const isNative = Capacitor.isNativePlatform();
@@ -40,6 +82,12 @@ export function initPostHog(): void {
       : {}),
   });
 
+  // Um opt-out anterior fica persistido pelo próprio PostHog; como o init só
+  // roda com consentimento concedido, garante o estado de captura ativo.
+  if (posthog.has_opted_out_capturing()) {
+    posthog.opt_in_capturing();
+  }
+
   for (const { event, properties } of pendingEvents) {
     posthog.capture(event, properties);
   }
@@ -49,10 +97,12 @@ export function initPostHog(): void {
 /**
  * Agenda a inicialização do PostHog para depois do primeiro paint, evitando que
  * o boot da aplicação concorra com o carregamento dos scripts de analytics.
+ * Só agenda se o usuário tiver consentido com a coleta de dados de uso.
  */
 export function schedulePostHogInit(): void {
   if (initialized || scheduled || !apiKey || typeof window === "undefined")
     return;
+  if (getAnalyticsConsent() !== "granted") return;
   scheduled = true;
 
   if (typeof window.requestIdleCallback === "function") {
@@ -73,7 +123,10 @@ export function captureEvent(
   properties?: EventProperties,
 ): void {
   if (!apiKey) return;
+  if (getAnalyticsConsent() === "denied") return;
   if (!initialized) {
+    // Sem resposta ainda: o evento fica na fila e só é enviado se o usuário
+    // aceitar (o init dá flush); se recusar, a fila é descartada.
     pendingEvents.push({ event, properties });
     schedulePostHogInit();
     return;
@@ -83,6 +136,7 @@ export function captureEvent(
 
 export function captureException(error: unknown): void {
   if (!apiKey) return;
+  if (getAnalyticsConsent() !== "granted") return;
   initPostHog();
   posthog.captureException(error);
 }
@@ -92,12 +146,13 @@ export function identifyUser(
   properties?: EventProperties,
 ): void {
   if (!apiKey) return;
+  if (getAnalyticsConsent() !== "granted") return;
   initPostHog();
   posthog.identify(userId, properties);
 }
 
 export function resetAnalyticsUser(): void {
   if (!apiKey) return;
-  initPostHog();
+  if (!initialized) return;
   posthog.reset();
 }
