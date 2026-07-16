@@ -119,6 +119,7 @@ export function CustomTabBar() {
                 openNewTask();
               }}
               whileTap={{ scale: 0.9 }}
+              aria-label="Adicionar tarefa"
               className="relative flex items-center justify-center p-2 rounded-2xl transition-colors touch-manipulation"
             >
               <div className="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-mint-400 to-emerald-500 shadow-[0_0_24px_rgba(52,211,153,0.35)]">

@@ -21,6 +21,7 @@ import { ProfileProvider } from "./lib/profile-context";
 import { NotificationsProvider } from "./lib/notifications-context";
 import { ImportLocalDataSheet } from "./components/ImportLocalDataSheet";
 import { NotificationPermissionSheet } from "./components/NotificationPermissionSheet";
+import { AnalyticsConsentSheet } from "./components/AnalyticsConsentSheet";
 import { syncNativeSchedulesFromStorage } from "./lib/native-notifications";
 import { handleAuthDeepLink } from "./lib/auth-deeplink";
 import { captureException } from "./lib/posthog";
@@ -48,6 +49,11 @@ const SettingsScreen = lazy(() =>
 const NotificationPreferencesScreen = lazy(() =>
   import("./screens/NotificationPreferencesScreen").then((m) => ({
     default: m.NotificationPreferencesScreen,
+  })),
+);
+const PrivacyPolicyScreen = lazy(() =>
+  import("./screens/PrivacyPolicyScreen").then((m) => ({
+    default: m.PrivacyPolicyScreen,
   })),
 );
 import { LoginScreen } from "./screens/LoginScreen";
@@ -123,6 +129,11 @@ function AppRoutes() {
               <Route exact path="/preferencias" component={SettingsScreen} />
               <Route
                 exact
+                path="/privacidade"
+                component={PrivacyPolicyScreen}
+              />
+              <Route
+                exact
                 path="/notificacoes/preferencias"
                 component={NotificationPreferencesScreen}
               />
@@ -142,6 +153,7 @@ function AppRoutes() {
       <NativeNotificationBridge />
       <ImportLocalDataSheet />
       <NotificationPermissionSheet />
+      <AnalyticsConsentSheet />
     </>
   );
 }
