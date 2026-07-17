@@ -1,13 +1,10 @@
 import { motion } from "../lib/motion";
-import { Clock, ListChecks } from "lucide-react";
+import { Clock } from "lucide-react";
 
 export interface StatsWidgetData {
   focusValue: string;
   focusGoalLabel: string;
   focusProgress: number;
-  tasksValue: string;
-  tasksRemainingLabel: string;
-  tasksProgress: number;
 }
 
 interface StatsWidgetProps {
@@ -22,81 +19,39 @@ const cardTransition = {
 
 export function StatsWidget({ stats, onViewStats }: StatsWidgetProps) {
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        <motion.button
-          type="button"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...cardTransition, delay: 0 }}
-          onClick={onViewStats}
-          className="card-glass p-4 text-left flex flex-col hover:bg-white/[0.04] transition-colors touch-manipulation"
-        >
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-mint-500/30 to-mint-600/20">
-              <Clock className="w-4 h-4 text-mint-400" strokeWidth={2} />
-            </div>
-            <div className="min-w-0">
-              <p className="text-obsidian-500 text-[10px] font-medium uppercase tracking-wider leading-tight truncate">
-                Foco Hoje
-              </p>
-              <p className="font-display font-bold text-2xl text-white leading-tight">
-                {stats.focusValue}
-              </p>
-            </div>
-          </div>
-
-          <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden mb-2">
-            <motion.div
-              className="h-full rounded-full bg-mint-500"
-              initial={{ width: 0 }}
-              animate={{ width: `${stats.focusProgress}%` }}
-              transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-            />
-          </div>
-          <p className="text-obsidian-500 text-xs truncate">
-            {stats.focusGoalLabel}
+    <motion.button
+      type="button"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ ...cardTransition, delay: 0 }}
+      onClick={onViewStats}
+      className="card-glass w-full p-4 text-left flex flex-col hover:bg-white/[0.04] transition-colors touch-manipulation"
+    >
+      <div className="flex items-center gap-2.5 mb-3">
+        <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-mint-500/30 to-mint-600/20">
+          <Clock className="w-4 h-4 text-mint-400" strokeWidth={2} />
+        </div>
+        <div className="min-w-0">
+          <p className="text-obsidian-500 text-[13px] font-medium tracking-wider leading-tight truncate">
+            Foco Hoje
           </p>
-        </motion.button>
-
-        <motion.button
-          type="button"
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ ...cardTransition, delay: 0.05 }}
-          onClick={onViewStats}
-          className="card-glass p-4 text-left flex flex-col hover:bg-white/[0.04] transition-colors touch-manipulation"
-        >
-          <div className="flex items-center gap-2.5 mb-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 bg-gradient-to-br from-electric-500/30 to-electric-600/20">
-              <ListChecks
-                className="w-4 h-4 text-electric-400"
-                strokeWidth={2}
-              />
-            </div>
-            <div className="min-w-0">
-              <p className="text-obsidian-500 text-[10px] font-medium uppercase tracking-wider leading-tight truncate">
-                Tarefas
-              </p>
-              <p className="font-display font-bold text-2xl text-white leading-tight">
-                {stats.tasksValue}
-              </p>
-            </div>
-          </div>
-
-          <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden mb-2">
-            <motion.div
-              className="h-full rounded-full bg-electric-500"
-              initial={{ width: 0 }}
-              animate={{ width: `${stats.tasksProgress}%` }}
-              transition={{ duration: 0.8, ease: "easeOut", delay: 0.25 }}
-            />
-          </div>
-          <p className="text-obsidian-500 text-xs truncate">
-            {stats.tasksRemainingLabel}
+          <p className="font-display font-bold text-2xl text-white leading-tight">
+            {stats.focusValue}
           </p>
-        </motion.button>
+        </div>
       </div>
-    </div>
+
+      <div className="h-1 rounded-full bg-white/[0.06] overflow-hidden mb-2">
+        <motion.div
+          className="h-full rounded-full bg-mint-500"
+          initial={{ width: 0 }}
+          animate={{ width: `${stats.focusProgress}%` }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+        />
+      </div>
+      <p className="text-obsidian-500 text-xs truncate">
+        {stats.focusGoalLabel}
+      </p>
+    </motion.button>
   );
 }

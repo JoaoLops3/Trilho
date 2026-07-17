@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { motion } from "../lib/motion";
 import { IonPage, IonContent } from "@ionic/react";
-import { Repeat } from "lucide-react";
+import { DailyTasksCard } from "../components/DailyTasksCard";
 import { FocusWeekChart } from "../components/FocusWeekChart";
 import { StatsWidget } from "../components/StatsWidget";
 import { TrainStreakCard } from "../components/TrainStreakCard";
@@ -37,21 +37,12 @@ export function StatsScreen() {
 
   const todayAgenda = filterTodayAgendaTasks(tasks);
   const completedToday = computeTodayCompletedCount(tasks);
-  const remainingTasks = todayAgenda.length - completedToday;
-  const tasksPercent =
-    todayAgenda.length > 0
-      ? Math.round((completedToday / todayAgenda.length) * 100)
-      : 0;
 
   const today = dayKey();
   const routineInstances = tasks.filter((t) => t.routineDate === today);
   const routinesDone = routineInstances.filter((t) =>
     isTaskCompletedOnDay(t, today),
   ).length;
-  const routinesPercent =
-    routineInstances.length > 0
-      ? Math.round((routinesDone / routineInstances.length) * 100)
-      : 0;
 
   const history = loadHistory();
   const recordDays = computeRecordStreak(history);
@@ -97,43 +88,22 @@ export function StatsScreen() {
                   focusValue: formatFocusTime(focusMinutes),
                   focusGoalLabel: `${focusPercent}% da meta de ${goalHours}h`,
                   focusProgress: focusPercent,
-                  tasksValue: `${completedToday} / ${todayAgenda.length}`,
-                  tasksRemainingLabel: `${remainingTasks} ${remainingTasks === 1 ? "restante" : "restantes"} hoje`,
-                  tasksProgress: tasksPercent,
                 }}
               />
             </motion.section>
 
-            {routineInstances.length > 0 && (
-              <motion.section
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.07 }}
-                className="card-glass p-4"
-              >
-                <div className="mb-3 flex items-center gap-2.5">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-coral-500/30 to-coral-600/20">
-                    <Repeat className="h-4 w-4 text-coral-400" strokeWidth={2} />
-                  </div>
-                  <div className="min-w-0">
-                    <p className="text-[10px] font-medium uppercase tracking-wider leading-tight text-obsidian-500">
-                      Rotinas
-                    </p>
-                    <p className="font-display font-bold text-2xl leading-tight text-white">
-                      {routinesDone} de {routineInstances.length} hoje
-                    </p>
-                  </div>
-                </div>
-                <div className="h-1 overflow-hidden rounded-full bg-white/[0.06]">
-                  <motion.div
-                    className="h-full rounded-full bg-coral-500"
-                    initial={{ width: 0 }}
-                    animate={{ width: `${routinesPercent}%` }}
-                    transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-                  />
-                </div>
-              </motion.section>
-            )}
+            <motion.section
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.07 }}
+            >
+              <DailyTasksCard
+                tasksCompleted={completedToday}
+                tasksTotal={todayAgenda.length}
+                routinesCompleted={routinesDone}
+                routinesTotal={routineInstances.length}
+              />
+            </motion.section>
 
             <motion.div
               initial={{ opacity: 0, y: 20 }}
