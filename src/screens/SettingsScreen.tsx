@@ -41,9 +41,9 @@ export function SettingsScreen() {
               </p>
             </motion.div>
 
-            <DailyGoalSettings />
-
             <NotificationPreferencesForm />
+
+            <DailyGoalSettings />
 
             <AnalyticsConsentSettings />
           </div>
