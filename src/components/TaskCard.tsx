@@ -5,6 +5,7 @@ import {
   Clock,
   MoreVertical,
   Pencil,
+  Repeat,
   RotateCcw,
   Trash2,
   Zap,
@@ -28,6 +29,10 @@ export interface Task {
   scheduledTime?: string;
   /** ISO 8601 — preenchido ao concluir a tarefa */
   completedAt?: string;
+  /** Id do template quando a tarefa é instância de uma rotina recorrente. */
+  routineTemplateId?: string;
+  /** dayKey "YYYY-MM-DD" da geração da instância (dedup por dia). */
+  routineDate?: string;
 }
 
 interface TaskCardProps {
@@ -197,6 +202,13 @@ export const TaskCard = memo(
                   <Clock className="w-3 h-3" strokeWidth={2} />
                   {task.scheduledTime}
                 </span>
+              )}
+              {task.routineTemplateId && (
+                <Repeat
+                  className="w-3 h-3 text-obsidian-500"
+                  strokeWidth={2}
+                  aria-label="Tarefa recorrente"
+                />
               )}
             </div>
 

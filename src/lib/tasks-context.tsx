@@ -22,9 +22,12 @@ import {
   saveHistory,
 } from "./day-stats";
 import { loadLastFocusDay, rolloverTasksIfNewDay } from "./day-rollover";
+import { generateRoutineInstances } from "./routine-generator";
+import { loadRoutines } from "./routine-storage";
 import { captureEvent } from "./posthog";
 import { taskAnalyticsProps } from "./analytics-task";
 import { useAuth } from "./auth-context";
+import { useRoutines } from "./routines-context";
 import { useSync } from "./sync-context";
 import {
   cancelTaskNotifications,
@@ -56,7 +59,10 @@ function getWallClockElapsed(
 
 function getInitialTasks(): Task[] {
   const loaded = loadTasks() ?? [];
-  return rolloverTasksIfNewDay(loaded);
+  return generateRoutineInstances(
+    rolloverTasksIfNewDay(loaded),
+    loadRoutines(),
+  );
 }
 
 function applyCompletion(
@@ -107,11 +113,6 @@ export function useTasks(): TasksContextValue {
   return ctx;
 }
 
-/**
- * Atualiza localmente (apenas no componente que chama) o tempo decorrido da
- * tarefa ativa a cada segundo. Para tarefas não ativas devolve o valor já
- * persistido sem disparar nenhum timer.
- */
 export function useActiveElapsed(task: Task | null | undefined): number {
   const { getLiveElapsed } = useTasks();
   const [, setTick] = useState(0);
@@ -137,6 +138,9 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     setNotificationPermissionPromptOpen,
   ] = useState(false);
   const { isAuthenticated } = useAuth();
+  const { routines } = useRoutines();
+  const routinesRef = useRef(routines);
+  routinesRef.current = routines;
   const {
     registerSyncHandlers,
     scheduleTasksPush,
@@ -146,13 +150,25 @@ export function TasksProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     registerSyncHandlers({
-      applyTasks: (nextTasks) => setTasks(rolloverTasksIfNewDay(nextTasks)),
+      applyTasks: (nextTasks) =>
+        setTasks(
+          generateRoutineInstances(
+            rolloverTasksIfNewDay(nextTasks),
+            routinesRef.current,
+          ),
+        ),
       applyHistory: (history) => {
         saveHistory(history);
         setStreak(computeStreak(history));
       },
     });
   }, [registerSyncHandlers]);
+
+  // Reconcilia instâncias quando os templates mudam (criação/edição/exclusão/
+  // ativação): gera a instância de hoje na hora e remove órfãs. Idempotente.
+  useEffect(() => {
+    setTasks((prev) => generateRoutineInstances(prev, routines));
+  }, [routines]);
 
   const taskToEdit = editingTaskId
     ? (tasks.find((t) => t.id === editingTaskId) ?? null)
@@ -194,7 +210,11 @@ export function TasksProvider({ children }: { children: ReactNode }) {
           t.id === active.id ? { ...t, elapsed: flushed } : t,
         );
       }
-      return rolloverTasksIfNewDay(next, today);
+      return generateRoutineInstances(
+        rolloverTasksIfNewDay(next, today),
+        routinesRef.current,
+        today,
+      );
     });
 
     if (activeSessionRef.current) {
@@ -269,10 +289,6 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     }
   }, [tasks, isAuthenticated, isApplyingRemote, scheduleTasksPush]);
 
-  // Detecta a conclusão automática da tarefa ativa. O intervalo roda a cada
-  // segundo, mas só toca no estado (re-render global) no instante em que a
-  // tarefa chega ao fim — a contagem visível é feita localmente em cada
-  // componente via useActiveElapsed.
   useEffect(() => {
     if (!activeTask) return;
 

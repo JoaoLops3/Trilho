@@ -19,8 +19,10 @@ import { savePreferences } from "./notification-preferences";
 import { mergeDailyGoalMinutes } from "./daily-goal";
 import { loadProfile, saveProfile } from "./profile-storage";
 import { saveTasks } from "./storage";
+import { saveRoutines } from "./routine-storage";
 import type { UserProfile } from "../types/avatar";
 import type { AppNotification } from "../types/notification";
+import type { RoutineTemplate } from "../types/routine";
 import { useAuth } from "./auth-context";
 import { captureEvent } from "./posthog";
 import {
@@ -32,6 +34,7 @@ import {
   syncNotificationsToCloud,
   syncPreferencesToCloud,
   syncProfileToCloud,
+  syncRoutinesToCloud,
   syncTasksToCloud,
 } from "./sync/cloud-sync";
 import {
@@ -49,6 +52,7 @@ export interface SyncHandlers {
   applyHistory?: (history: DayStat[]) => void;
   applyNotifications?: (notifications: AppNotification[]) => void;
   applyPreferences?: (preferences: NotificationPreferences) => void;
+  applyRoutines?: (routines: RoutineTemplate[]) => void;
 }
 
 interface SyncContextValue {
@@ -62,6 +66,7 @@ interface SyncContextValue {
   pushProfileNow: (profile: UserProfile) => Promise<void>;
   schedulePreferencesPush: (preferences: NotificationPreferences) => void;
   scheduleNotificationsPush: (notifications: AppNotification[]) => void;
+  scheduleRoutinesPush: (routines: RoutineTemplate[]) => void;
   resolveImport: (useLocalData: boolean) => Promise<void>;
   refreshFromCloud: () => Promise<void>;
 }
@@ -82,6 +87,7 @@ function persistSnapshotLocally(snapshot: UserDataSnapshot): void {
   saveHistory(snapshot.history);
   savePreferences(snapshot.preferences);
   saveNotifications(snapshot.notifications);
+  saveRoutines(snapshot.routines);
 }
 
 export function SyncProvider({ children }: { children: ReactNode }) {
@@ -119,6 +125,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     handlersRef.current.applyHistory?.(mergedSnapshot.history);
     handlersRef.current.applyNotifications?.(mergedSnapshot.notifications);
     handlersRef.current.applyPreferences?.(mergedSnapshot.preferences);
+    handlersRef.current.applyRoutines?.(mergedSnapshot.routines);
     persistSnapshotLocally(mergedSnapshot);
     window.setTimeout(() => {
       isApplyingRemoteRef.current = false;
@@ -252,6 +259,13 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     [schedulePush, userId],
   );
 
+  const scheduleRoutinesPush = useCallback(
+    (routines: RoutineTemplate[]) => {
+      schedulePush("routines", () => syncRoutinesToCloud(userId!, routines));
+    },
+    [schedulePush, userId],
+  );
+
   useEffect(() => {
     if (authLoading || !isAuthenticated || !userId) {
       initialSyncDoneRef.current = null;
@@ -296,6 +310,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       pushProfileNow,
       schedulePreferencesPush,
       scheduleNotificationsPush,
+      scheduleRoutinesPush,
       resolveImport,
       refreshFromCloud,
     }),
@@ -310,6 +325,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       pushProfileNow,
       schedulePreferencesPush,
       scheduleNotificationsPush,
+      scheduleRoutinesPush,
       resolveImport,
       refreshFromCloud,
     ],

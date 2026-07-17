@@ -9,6 +9,7 @@ export const STORAGE_KEYS = {
   notificationPermissionPromptSeen: `${PREFIX}:notification-permission-prompt-seen`,
   lastFocusDay: `${PREFIX}:last-focus-day`,
   analyticsConsent: `${PREFIX}:analytics-consent`,
+  routines: `${PREFIX}:routines`,
 } as const;
 
 export const ALL_STORAGE_KEYS = Object.values(STORAGE_KEYS);
