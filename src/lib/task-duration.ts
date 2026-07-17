@@ -27,6 +27,19 @@ export function formatDuration(seconds: number): string {
   return `${hours}h ${minutes} min`;
 }
 
+/** Contagem regressiva no anel: MM:SS abaixo de 1h, H:MM:SS a partir de 1h. */
+export function formatTimerDisplay(totalSeconds: number): string {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const hours = Math.floor(safe / 3600);
+  const minutes = Math.floor((safe % 3600) / 60);
+  const seconds = safe % 60;
+
+  if (hours > 0) {
+    return `${hours}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+  }
+  return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+}
+
 export function partsToFieldStrings(seconds: number): {
   hours: string;
   minutes: string;
@@ -63,10 +76,7 @@ export function snapDurationSeconds(seconds: number): number {
 /** ±1 passo do stepper; piso em 15 min, teto em 8 h. */
 export function stepDurationSeconds(current: number, delta: number): number {
   const next = current + delta;
-  return Math.min(
-    MAX_DURATION_SECONDS,
-    Math.max(DURATION_STEP_SECONDS, next),
-  );
+  return Math.min(MAX_DURATION_SECONDS, Math.max(DURATION_STEP_SECONDS, next));
 }
 
 export function validateDurationParts(
