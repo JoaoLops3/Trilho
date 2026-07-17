@@ -56,19 +56,14 @@ export function StatsScreen() {
 
   return (
     <IonPage>
-      <IonContent
-        scrollY={false}
-        forceOverscroll={false}
-        className="ion-content-custom ion-content-auth"
-      >
+      <IonContent scrollY={true} className="ion-content-custom">
         <OrbBackground />
 
-        <div className="relative z-10 flex h-full flex-col overflow-hidden px-4 pt-safe pb-tab-bar md:mx-auto md:max-w-xl">
+        <div className="relative z-10 px-4 pt-safe pb-tab-bar md:mx-auto md:max-w-xl">
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
-            className="shrink-0"
           >
             <h1 className="m-0 font-display font-semibold text-2xl text-white tracking-tight">
               Estatísticas
@@ -78,7 +73,7 @@ export function StatsScreen() {
             </p>
           </motion.div>
 
-          <div className="mt-4 flex shrink-0 flex-col gap-3">
+          <div className="mt-4 flex flex-col gap-3 pb-6">
             <motion.section
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
