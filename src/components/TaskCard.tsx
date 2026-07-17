@@ -12,7 +12,7 @@ import {
 } from "lucide-react";
 import { captureEvent } from "../lib/posthog";
 import { taskAnalyticsProps } from "../lib/analytics-task";
-import { formatDuration } from "../lib/task-duration";
+import { formatDuration, formatTimerDisplay } from "../lib/task-duration";
 import { useActiveElapsed } from "../lib/tasks-context";
 
 export type TaskStatus = "active" | "pending" | "paused" | "completed";
@@ -224,9 +224,8 @@ export const TaskCard = memo(
                 animate={{ opacity: 1, y: 0 }}
                 className="flex items-center gap-3"
               >
-                <span className="font-display font-semibold text-mint-400 text-2xl tracking-tight">
-                  {String(Math.floor(remainingTime / 60)).padStart(2, "0")}:
-                  {String(remainingTime % 60).padStart(2, "0")}
+                <span className="font-display font-semibold text-mint-400 text-2xl tracking-tight tabular-nums">
+                  {formatTimerDisplay(remainingTime)}
                 </span>
                 <span className="text-obsidian-500 text-sm">restantes</span>
               </motion.div>

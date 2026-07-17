@@ -8,6 +8,7 @@ import { ProgressRing } from "../components/ProgressRing";
 import { OrbBackground } from "../components/OrbBackground";
 import { captureEvent } from "../lib/posthog";
 import { computeFocusSeconds, sortByScheduledTime } from "../lib/day-stats";
+import { formatTimerDisplay } from "../lib/task-duration";
 import { useDailyGoal } from "../lib/use-daily-goal";
 import { useActiveElapsed, useTasks } from "../lib/tasks-context";
 import { useProfile } from "../lib/profile-context";
@@ -121,55 +122,55 @@ export function DashboardScreen() {
                 }}
               >
                 <div
-                  className={`card-glass p-3.5 ${
+                  className={`card-glass p-4 ${
                     highlightTaskId === activeTask.id
                       ? "ring-2 ring-mint-400/60 ring-offset-2 ring-offset-surface-primary"
                       : ""
                   }`}
                 >
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3.5">
                     <ProgressRing
                       progress={sessionProgress}
-                      size={76}
-                      strokeWidth={5}
+                      size={88}
+                      strokeWidth={6}
                     >
-                      <p className="m-0 font-display font-bold text-base text-white leading-none tabular-nums">
-                        {String(Math.floor(sessionRemaining / 60)).padStart(
-                          2,
-                          "0",
-                        )}
-                        :{String(sessionRemaining % 60).padStart(2, "0")}
+                      <p
+                        className={`m-0 font-display font-bold text-white leading-none tabular-nums ${
+                          sessionRemaining >= 3600 ? "text-[13px]" : "text-lg"
+                        }`}
+                      >
+                        {formatTimerDisplay(sessionRemaining)}
                       </p>
-                      <p className="m-0 mt-0.5 text-[7px] text-obsidian-500 uppercase tracking-wide leading-none whitespace-nowrap">
+                      <p className="m-0 mt-1 text-[8px] text-obsidian-500 uppercase tracking-wide leading-none whitespace-nowrap">
                         restando
                       </p>
                     </ProgressRing>
 
                     <div className="min-w-0 flex-1">
-                      <div className="mb-1 flex items-center gap-2">
+                      <div className="mb-1.5 flex items-center gap-2">
                         <motion.span
                           animate={{
                             scale: [1, 1.3, 1],
                             opacity: [1, 0.6, 1],
                           }}
                           transition={{ duration: 2, repeat: Infinity }}
-                          className="h-2 w-2 rounded-full bg-mint-400"
+                          className="h-2.5 w-2.5 rounded-full bg-mint-400"
                         />
-                        <span className="text-[10px] font-semibold uppercase tracking-wider text-mint-400">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-mint-400">
                           Em Andamento
                         </span>
                       </div>
-                      <h2 className="mb-0.5 truncate font-display text-base font-semibold text-white">
+                      <h2 className="mb-1 truncate font-display text-lg font-semibold text-white">
                         {activeTask.title}
                       </h2>
-                      <p className="mb-2 text-xs text-obsidian-400">
+                      <p className="mb-2.5 text-sm text-obsidian-400">
                         Foco hoje: {focusMinutes}m / {goalHours}h
                       </p>
                       <div className="flex items-center gap-2">
                         <button
                           type="button"
                           onClick={() => changeStatus(activeTask.id, "paused")}
-                          className="rounded-xl border border-mint-500/30 bg-mint-500/10 px-3 py-1 text-xs font-medium text-mint-400 transition-colors hover:bg-mint-500/20 touch-manipulation"
+                          className="rounded-xl border border-mint-500/30 bg-mint-500/10 px-3.5 py-1.5 text-sm font-medium text-mint-400 transition-colors hover:bg-mint-500/20 touch-manipulation"
                         >
                           Pausar
                         </button>
@@ -178,7 +179,7 @@ export function DashboardScreen() {
                           onClick={() =>
                             changeStatus(activeTask.id, "completed")
                           }
-                          className="rounded-xl border border-white/10 bg-white/[0.04] px-3 py-1 text-xs font-medium text-obsidian-300 transition-colors hover:bg-white/[0.08] touch-manipulation"
+                          className="rounded-xl border border-white/10 bg-white/[0.04] px-3.5 py-1.5 text-sm font-medium text-obsidian-300 transition-colors hover:bg-white/[0.08] touch-manipulation"
                         >
                           Encerrar
                         </button>
