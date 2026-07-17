@@ -68,6 +68,8 @@ export interface Database {
           priority: TaskPriority;
           scheduled_time: string | null;
           completed_at: string | null;
+          routine_template_id: string | null;
+          routine_date: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -82,6 +84,8 @@ export interface Database {
           priority?: TaskPriority;
           scheduled_time?: string | null;
           completed_at?: string | null;
+          routine_template_id?: string | null;
+          routine_date?: string | null;
           created_at?: string;
           updated_at?: string;
         };
@@ -96,6 +100,50 @@ export interface Database {
           priority?: TaskPriority;
           scheduled_time?: string | null;
           completed_at?: string | null;
+          routine_template_id?: string | null;
+          routine_date?: string | null;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Relationships: [];
+      };
+      routine_templates: {
+        Row: {
+          id: string;
+          user_id: string;
+          title: string;
+          category: string;
+          duration: number;
+          priority: TaskPriority;
+          scheduled_time: string | null;
+          weekdays: number[];
+          active: boolean;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: {
+          id: string;
+          user_id: string;
+          title: string;
+          category: string;
+          duration?: number;
+          priority?: TaskPriority;
+          scheduled_time?: string | null;
+          weekdays: number[];
+          active?: boolean;
+          created_at?: string;
+          updated_at?: string;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          title?: string;
+          category?: string;
+          duration?: number;
+          priority?: TaskPriority;
+          scheduled_time?: string | null;
+          weekdays?: number[];
+          active?: boolean;
           created_at?: string;
           updated_at?: string;
         };
@@ -198,3 +246,5 @@ export type TaskRow = Database["public"]["Tables"]["tasks"]["Row"];
 export type DayHistoryRow = Database["public"]["Tables"]["day_history"]["Row"];
 export type NotificationRow =
   Database["public"]["Tables"]["notifications"]["Row"];
+export type RoutineTemplateRow =
+  Database["public"]["Tables"]["routine_templates"]["Row"];

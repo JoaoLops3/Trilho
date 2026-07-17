@@ -12,6 +12,7 @@ import {
   Flame,
   ChevronRight,
   ImageIcon,
+  Repeat,
   type LucideIcon,
   Pencil,
 } from "lucide-react";
@@ -226,6 +227,13 @@ export function ProfileScreen() {
                   icon={ImageIcon}
                   label="Alterar avatar"
                   onClick={openAvatarPicker}
+                />
+                <SettingsRow
+                  icon={Repeat}
+                  label="Minhas rotinas"
+                  onClick={() =>
+                    history.push("/rotinas", tabNavigationState("profile"))
+                  }
                 />
                 <SettingsRow
                   icon={Bell}

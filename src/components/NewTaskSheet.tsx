@@ -3,18 +3,26 @@ import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "../lib/motion";
 import { Clock, X } from "lucide-react";
 import { DurationFields } from "./DurationFields";
+import { WeekdayPicker } from "./WeekdayPicker";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
 import {
   DEFAULT_DURATION_SECONDS,
   validateDurationSeconds,
 } from "../lib/task-duration";
 import type { Task, TaskPriority } from "./TaskCard";
+import type { RoutineTemplate, RoutineTemplateInput } from "../types/routine";
 
 interface NewTaskSheetProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (task: Task) => void;
   taskToEdit?: Task | null;
+  /** Habilita o modo "Repetir" (criação de rotina) no seletor do topo. */
+  allowRoutineMode?: boolean;
+  /** Força o modo rotina sem seletor (criação a partir de "Minhas rotinas"). */
+  routineOnly?: boolean;
+  onSubmitRoutine?: (input: RoutineTemplateInput, editingId?: string) => void;
+  routineToEdit?: RoutineTemplate | null;
 }
 
 const categories = ["Focus", "Criativo", "Saúde", "Entretenimento"] as const;
@@ -32,6 +40,9 @@ const priorities: { id: TaskPriority; label: string }[] = [
   { id: "high", label: "Alta" },
 ];
 
+/** Dias úteis (seg–sex) como padrão inicial ao criar uma rotina nova. */
+const DEFAULT_ROUTINE_WEEKDAYS = [1, 2, 3, 4, 5];
+
 function createId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
     return crypto.randomUUID();
@@ -46,10 +57,14 @@ export function NewTaskSheet({
   onClose,
   onSubmit,
   taskToEdit,
+  allowRoutineMode = false,
+  routineOnly = false,
+  onSubmitRoutine,
+  routineToEdit,
 }: NewTaskSheetProps) {
-  const isEditing = Boolean(taskToEdit);
   const keyboardInset = useKeyboardInset(isOpen);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const [mode, setMode] = useState<"task" | "routine">("task");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<string>(categories[0]);
   const [durationSeconds, setDurationSeconds] = useState(
@@ -57,21 +72,40 @@ export function NewTaskSheet({
   );
   const [scheduledTime, setScheduledTime] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
+  const [weekdays, setWeekdays] = useState<number[]>(DEFAULT_ROUTINE_WEEKDAYS);
+
+  // Edição fixa o modo; criação livre respeita allowRoutineMode.
+  const isEditingRoutine = Boolean(routineToEdit);
+  const isEditingTask = Boolean(taskToEdit);
+  const isEditing = isEditingTask || isEditingRoutine;
+  const showModeToggle = allowRoutineMode && !isEditing && !routineOnly;
+  const isRoutine = mode === "routine";
 
   useEffect(() => {
     if (isOpen) {
-      if (taskToEdit) {
+      if (routineToEdit) {
+        setMode("routine");
+        setTitle(routineToEdit.title);
+        setCategory(routineToEdit.category);
+        setDurationSeconds(routineToEdit.duration);
+        setScheduledTime(routineToEdit.scheduledTime ?? "");
+        setPriority(routineToEdit.priority);
+        setWeekdays(routineToEdit.weekdays);
+      } else if (taskToEdit) {
+        setMode("task");
         setTitle(taskToEdit.title);
         setCategory(taskToEdit.category);
         setDurationSeconds(taskToEdit.duration);
         setScheduledTime(taskToEdit.scheduledTime ?? "");
         setPriority(taskToEdit.priority);
       } else {
+        setMode(routineOnly ? "routine" : "task");
         setTitle("");
         setCategory(categories[0]);
         setDurationSeconds(DEFAULT_DURATION_SECONDS);
         setScheduledTime("");
         setPriority("medium");
+        setWeekdays(DEFAULT_ROUTINE_WEEKDAYS);
       }
 
       const focusTimer = window.setTimeout(() => {
@@ -79,15 +113,34 @@ export function NewTaskSheet({
       }, 320);
       return () => window.clearTimeout(focusTimer);
     }
-  }, [isOpen, taskToEdit]);
+  }, [isOpen, taskToEdit, routineToEdit, routineOnly]);
 
   const trimmedTitle = title.trim();
   const durationError = validateDurationSeconds(durationSeconds);
-  const isValid = trimmedTitle.length > 0 && !durationError;
+  const weekdaysError = isRoutine && weekdays.length === 0;
+  const isValid = trimmedTitle.length > 0 && !durationError && !weekdaysError;
 
   const handleSubmit = () => {
     if (!isValid || durationError) return;
     const duration = durationSeconds;
+
+    if (isRoutine) {
+      if (!onSubmitRoutine || weekdays.length === 0) return;
+      onSubmitRoutine(
+        {
+          title: trimmedTitle,
+          category,
+          duration,
+          priority,
+          scheduledTime: scheduledTime || undefined,
+          weekdays,
+        },
+        routineToEdit?.id,
+      );
+      onClose();
+      return;
+    }
+
     const task: Task = taskToEdit
       ? {
           ...taskToEdit,
@@ -111,6 +164,19 @@ export function NewTaskSheet({
     onSubmit(task);
     onClose();
   };
+
+  const heading = isRoutine
+    ? isEditingRoutine
+      ? "Editar rotina"
+      : "Nova rotina"
+    : isEditingTask
+      ? "Editar tarefa"
+      : "Nova tarefa";
+  const submitLabel = isEditing
+    ? "Salvar alterações"
+    : isRoutine
+      ? "Criar rotina"
+      : "Adicionar tarefa";
 
   return createPortal(
     <AnimatePresence>
@@ -147,7 +213,7 @@ export function NewTaskSheet({
 
             <div className="flex items-center justify-between mb-5">
               <h2 className="font-display font-semibold text-xl text-white">
-                {isEditing ? "Editar tarefa" : "Nova tarefa"}
+                {heading}
               </h2>
               <button
                 type="button"
@@ -158,6 +224,25 @@ export function NewTaskSheet({
                 <X className="w-5 h-5" strokeWidth={2} />
               </button>
             </div>
+
+            {showModeToggle && (
+              <div className="mb-4 grid grid-cols-2 gap-2 rounded-2xl bg-white/[0.04] p-1">
+                {(["task", "routine"] as const).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => setMode(option)}
+                    className={`rounded-xl py-2 text-sm font-medium transition-colors touch-manipulation ${
+                      mode === option
+                        ? "bg-mint-500/20 text-mint-400 border border-mint-500/40"
+                        : "text-obsidian-300 border border-transparent hover:bg-white/[0.06]"
+                    }`}
+                  >
+                    {option === "task" ? "Só hoje" : "Repetir"}
+                  </button>
+                ))}
+              </div>
+            )}
 
             <div className="space-y-4">
               <div>
@@ -256,13 +341,30 @@ export function NewTaskSheet({
                 </div>
               </div>
 
+              {isRoutine && (
+                <div>
+                  <label className="block text-xs text-obsidian-400 uppercase tracking-wide mb-2">
+                    Repetir em
+                  </label>
+                  <WeekdayPicker value={weekdays} onChange={setWeekdays} />
+                  <p className="mt-2 text-xs text-obsidian-500">
+                    Domingo a sábado, da esquerda para a direita.
+                  </p>
+                  {weekdaysError && (
+                    <p className="mt-1 text-xs text-coral-400">
+                      Selecione ao menos um dia.
+                    </p>
+                  )}
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={handleSubmit}
                 disabled={!isValid}
-                className="btn-primary w-full mt-2 disabled:opacity-40 disabled:cursor-not-allowed touch-manipulation"
+                className="btn-primary w-full mt-2 disabled:opacity-70 disabled:cursor-not-allowed touch-manipulation"
               >
-                {isEditing ? "Salvar alterações" : "Adicionar tarefa"}
+                {submitLabel}
               </button>
             </div>
           </motion.div>

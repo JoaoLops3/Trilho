@@ -17,13 +17,16 @@ import {
   dayStatToRow,
   notificationToRow,
   profileToEditableRow,
+  routineToRow,
   rowToDayStat,
   rowToNotification,
   rowToProfile,
+  rowToRoutine,
   rowToTask,
   taskToRow,
 } from "./mappers";
 import type { Json, ProfileRow } from "../../types/database";
+import type { RoutineTemplate } from "../../types/routine";
 import type { UserDataSnapshot } from "./mappers";
 
 function mergePreferences(
@@ -93,29 +96,36 @@ export async function pullUserSnapshot(
     throw new Error("Supabase não configurado");
   }
 
-  const [profileRes, tasksRes, historyRes, prefsRes, notificationsRes] =
-    await Promise.all([
-      supabase
-        .from("profiles")
-        .select(
-          "id, display_name, nickname, avatar_seed, avatar_style, daily_goal_minutes, local_import_done",
-        )
-        .eq("id", userId)
-        .maybeSingle(),
-      supabase.from("tasks").select("*").eq("user_id", userId),
-      supabase.from("day_history").select("*").eq("user_id", userId),
-      supabase
-        .from("notification_preferences")
-        .select("prefs")
-        .eq("user_id", userId)
-        .maybeSingle(),
-      supabase
-        .from("notifications")
-        .select("*")
-        .eq("user_id", userId)
-        .order("created_at", { ascending: false })
-        .limit(50),
-    ]);
+  const [
+    profileRes,
+    tasksRes,
+    historyRes,
+    prefsRes,
+    notificationsRes,
+    routinesRes,
+  ] = await Promise.all([
+    supabase
+      .from("profiles")
+      .select(
+        "id, display_name, nickname, avatar_seed, avatar_style, daily_goal_minutes, local_import_done",
+      )
+      .eq("id", userId)
+      .maybeSingle(),
+    supabase.from("tasks").select("*").eq("user_id", userId),
+    supabase.from("day_history").select("*").eq("user_id", userId),
+    supabase
+      .from("notification_preferences")
+      .select("prefs")
+      .eq("user_id", userId)
+      .maybeSingle(),
+    supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(50),
+    supabase.from("routine_templates").select("*").eq("user_id", userId),
+  ]);
 
   const profileRow = profileRes.data as ProfileRow | null;
   const localProfile = loadProfile();
@@ -146,6 +156,7 @@ export async function pullUserSnapshot(
     notifications: (notificationsRes.data ?? []).map((row) =>
       rowToNotification(row),
     ),
+    routines: (routinesRes.data ?? []).map((row) => rowToRoutine(row)),
     localImportDone: profileRow?.local_import_done ?? false,
   };
 }
@@ -174,6 +185,7 @@ export async function pushUserSnapshot(
   await syncHistoryToCloud(userId, snapshot.history);
   await syncNotificationsToCloud(userId, snapshot.notifications);
   await syncPreferencesToCloud(userId, snapshot.preferences);
+  await syncRoutinesToCloud(userId, snapshot.routines);
 
   await supabase
     .from("profiles")
@@ -213,6 +225,35 @@ export async function syncTasksToCloud(
 
   if (staleIds.length > 0) {
     await supabase.from("tasks").delete().in("id", staleIds);
+  }
+}
+
+export async function syncRoutinesToCloud(
+  userId: string,
+  routines: RoutineTemplate[],
+): Promise<void> {
+  const supabase = getSupabase();
+  if (!supabase) return;
+
+  const rows = routines.map((routine) => routineToRow(routine, userId));
+  const ids = new Set(routines.map((routine) => routine.id));
+
+  if (rows.length > 0) {
+    await supabase.from("routine_templates").upsert(rows);
+  }
+
+  const { data: existing } = await supabase
+    .from("routine_templates")
+    .select("id")
+    .eq("user_id", userId);
+
+  const staleIds =
+    existing
+      ?.filter((row) => !ids.has(row.id as string))
+      .map((row) => row.id as string) ?? [];
+
+  if (staleIds.length > 0) {
+    await supabase.from("routine_templates").delete().in("id", staleIds);
   }
 }
 

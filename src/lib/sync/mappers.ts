@@ -5,13 +5,16 @@ import { loadNotifications } from "../notification-storage";
 import { loadPreferences } from "../notification-preferences";
 import { DEFAULT_ACCOUNT_NAME, loadProfile } from "../profile-storage";
 import { loadTasks } from "../storage";
+import { loadRoutines } from "../routine-storage";
 import type { AvatarStyle, UserProfile } from "../../types/avatar";
 import { DEFAULT_DAILY_GOAL_MINUTES } from "../daily-goal";
 import type { AppNotification } from "../../types/notification";
+import type { RoutineTemplate } from "../../types/routine";
 import type {
   DayHistoryRow,
   NotificationRow,
   ProfileRow,
+  RoutineTemplateRow,
   TaskRow,
 } from "../../types/database";
 import type { Database } from "../../types/database";
@@ -23,6 +26,7 @@ export interface UserDataSnapshot {
   profile: UserProfile;
   preferences: NotificationPreferences;
   notifications: AppNotification[];
+  routines: RoutineTemplate[];
   localImportDone: boolean;
 }
 
@@ -41,6 +45,8 @@ export function taskToRow(
     priority: task.priority,
     scheduled_time: task.scheduledTime ?? null,
     completed_at: task.completedAt ?? null,
+    routine_template_id: task.routineTemplateId ?? null,
+    routine_date: task.routineDate ?? null,
     updated_at: new Date().toISOString(),
   };
 }
@@ -56,6 +62,41 @@ export function rowToTask(row: TaskRow): Task {
     priority: row.priority,
     scheduledTime: row.scheduled_time ?? undefined,
     completedAt: row.completed_at ?? undefined,
+    routineTemplateId: row.routine_template_id ?? undefined,
+    routineDate: row.routine_date ?? undefined,
+  };
+}
+
+export function routineToRow(
+  routine: RoutineTemplate,
+  userId: string,
+): Database["public"]["Tables"]["routine_templates"]["Insert"] {
+  return {
+    id: routine.id,
+    user_id: userId,
+    title: routine.title,
+    category: routine.category,
+    duration: routine.duration,
+    priority: routine.priority,
+    scheduled_time: routine.scheduledTime ?? null,
+    weekdays: routine.weekdays,
+    active: routine.active,
+    created_at: routine.createdAt,
+    updated_at: new Date().toISOString(),
+  };
+}
+
+export function rowToRoutine(row: RoutineTemplateRow): RoutineTemplate {
+  return {
+    id: row.id,
+    title: row.title,
+    category: row.category,
+    duration: row.duration,
+    priority: row.priority,
+    scheduledTime: row.scheduled_time ?? undefined,
+    weekdays: row.weekdays,
+    active: row.active,
+    createdAt: row.created_at,
   };
 }
 
@@ -164,6 +205,7 @@ export function readLocalSnapshot(): UserDataSnapshot {
     profile: loadProfile(),
     preferences: loadPreferences(),
     notifications: loadNotifications(),
+    routines: loadRoutines(),
     localImportDone: false,
   };
 }
@@ -173,6 +215,7 @@ export function hasMeaningfulLocalData(): boolean {
   if (snapshot.tasks.length > 0) return true;
   if (snapshot.history.length > 0) return true;
   if (snapshot.notifications.length > 0) return true;
+  if (snapshot.routines.length > 0) return true;
   if (snapshot.profile.avatarSeed) return true;
   if (snapshot.profile.nickname) return true;
   if (snapshot.profile.accountName !== "Alex") return true;
@@ -191,5 +234,6 @@ export const EMPTY_SNAPSHOT: UserDataSnapshot = {
   },
   preferences: readLocalSnapshot().preferences,
   notifications: [],
+  routines: [],
   localImportDone: true,
 };

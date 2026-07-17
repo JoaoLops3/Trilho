@@ -14,6 +14,7 @@ import { CustomTabBar } from "./components/CustomTabBar";
 import { NewTaskSheet } from "./components/NewTaskSheet";
 import { NativeNotificationBridge } from "./components/NativeNotificationBridge";
 import { TasksProvider, useTasks } from "./lib/tasks-context";
+import { RoutinesProvider, useRoutines } from "./lib/routines-context";
 import { AuthProvider, isAuthRoute } from "./lib/auth-context";
 import { AuthGate } from "./components/AuthGate";
 import { SyncProvider } from "./lib/sync-context";
@@ -56,6 +57,11 @@ const PrivacyPolicyScreen = lazy(() =>
     default: m.PrivacyPolicyScreen,
   })),
 );
+const RoutinesScreen = lazy(() =>
+  import("./screens/RoutinesScreen").then((m) => ({
+    default: m.RoutinesScreen,
+  })),
+);
 import { LoginScreen } from "./screens/LoginScreen";
 import { SignUpScreen } from "./screens/SignUpScreen";
 import { ForgotPasswordScreen } from "./screens/ForgotPasswordScreen";
@@ -78,12 +84,15 @@ function RouteFallback() {
 
 function GlobalTaskSheet() {
   const { isNewTaskOpen, taskToEdit, closeTaskSheet, submitTask } = useTasks();
+  const { createRoutine } = useRoutines();
   return (
     <NewTaskSheet
       isOpen={isNewTaskOpen}
       onClose={closeTaskSheet}
       onSubmit={submitTask}
       taskToEdit={taskToEdit}
+      allowRoutineMode={!taskToEdit}
+      onSubmitRoutine={(input) => createRoutine(input)}
     />
   );
 }
@@ -93,9 +102,6 @@ function AppRoutes() {
   const location = useLocation();
   const showTabBar = !isAuthRoute(location.pathname);
 
-  // Só ressincroniza notificações nativas quando muda algo relevante para o
-  // agendamento (status, horário, duração, criação/remoção) — nunca a cada
-  // tick do timer, que altera apenas o elapsed.
   const notificationFingerprint = useMemo(
     () =>
       tasks
@@ -127,6 +133,7 @@ function AppRoutes() {
                 component={NotificationsScreen}
               />
               <Route exact path="/preferencias" component={SettingsScreen} />
+              <Route exact path="/rotinas" component={RoutinesScreen} />
               <Route
                 exact
                 path="/privacidade"
@@ -207,13 +214,15 @@ function App() {
         <AuthProvider>
           <SyncProvider>
             <ProfileProvider>
-              <TasksProvider>
-                <NotificationsProvider>
-                  <IonReactRouter>
-                    <AppRoutes />
-                  </IonReactRouter>
-                </NotificationsProvider>
-              </TasksProvider>
+              <RoutinesProvider>
+                <TasksProvider>
+                  <NotificationsProvider>
+                    <IonReactRouter>
+                      <AppRoutes />
+                    </IonReactRouter>
+                  </NotificationsProvider>
+                </TasksProvider>
+              </RoutinesProvider>
             </ProfileProvider>
           </SyncProvider>
         </AuthProvider>
