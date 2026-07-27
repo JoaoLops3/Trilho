@@ -10,6 +10,7 @@ export const STORAGE_KEYS = {
   lastFocusDay: `${PREFIX}:last-focus-day`,
   analyticsConsent: `${PREFIX}:analytics-consent`,
   routines: `${PREFIX}:routines`,
+  routineOnboardingSeen: `${PREFIX}:routine-onboarding-seen`,
 } as const;
 
 export const ALL_STORAGE_KEYS = Object.values(STORAGE_KEYS);

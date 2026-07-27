@@ -62,6 +62,11 @@ const RoutinesScreen = lazy(() =>
     default: m.RoutinesScreen,
   })),
 );
+const OnboardingRoutineScreen = lazy(() =>
+  import("./screens/OnboardingRoutineScreen").then((m) => ({
+    default: m.OnboardingRoutineScreen,
+  })),
+);
 import { LoginScreen } from "./screens/LoginScreen";
 import { SignUpScreen } from "./screens/SignUpScreen";
 import { ForgotPasswordScreen } from "./screens/ForgotPasswordScreen";
@@ -100,7 +105,8 @@ function GlobalTaskSheet() {
 function AppRoutes() {
   const { tasks } = useTasks();
   const location = useLocation();
-  const showTabBar = !isAuthRoute(location.pathname);
+  const isOnboarding = location.pathname === "/rotina/montar";
+  const showTabBar = !isAuthRoute(location.pathname) && !isOnboarding;
 
   const notificationFingerprint = useMemo(
     () =>
@@ -134,6 +140,11 @@ function AppRoutes() {
               />
               <Route exact path="/preferencias" component={SettingsScreen} />
               <Route exact path="/rotinas" component={RoutinesScreen} />
+              <Route
+                exact
+                path="/rotina/montar"
+                component={OnboardingRoutineScreen}
+              />
               <Route
                 exact
                 path="/privacidade"

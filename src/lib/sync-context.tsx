@@ -59,6 +59,8 @@ interface SyncContextValue {
   isSyncing: boolean;
   isApplyingRemote: boolean;
   importPromptOpen: boolean;
+  /** True depois do first sync (ou se não há sessão). Evita decisões prematuras. */
+  initialSyncComplete: boolean;
   registerSyncHandlers: (handlers: SyncHandlers) => void;
   scheduleTasksPush: (tasks: Task[]) => void;
   scheduleHistoryPush: (history: DayStat[]) => void;
@@ -97,6 +99,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isApplyingRemote, setIsApplyingRemote] = useState(false);
   const [importPromptOpen, setImportPromptOpen] = useState(false);
+  const [initialSyncComplete, setInitialSyncComplete] = useState(false);
   const isApplyingRemoteRef = useRef(false);
   const handlersRef = useRef<SyncHandlers>({});
   const pushTimersRef = useRef<Record<string, ReturnType<typeof setTimeout>>>(
@@ -157,6 +160,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         }
       } finally {
         setIsSyncing(false);
+        setInitialSyncComplete(true);
       }
     },
     [applySnapshot],
@@ -267,14 +271,21 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    if (authLoading || !isAuthenticated || !userId) {
+    if (authLoading) {
+      setInitialSyncComplete(false);
+      return;
+    }
+
+    if (!isAuthenticated || !userId) {
       initialSyncDoneRef.current = null;
       setImportPromptOpen(false);
+      setInitialSyncComplete(true);
       return;
     }
 
     if (initialSyncDoneRef.current === userId) return;
     initialSyncDoneRef.current = userId;
+    setInitialSyncComplete(false);
     void runInitialSync(userId);
   }, [authLoading, isAuthenticated, userId, runInitialSync]);
 
@@ -303,6 +314,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       isSyncing,
       isApplyingRemote,
       importPromptOpen,
+      initialSyncComplete,
       registerSyncHandlers,
       scheduleTasksPush,
       scheduleHistoryPush,
@@ -318,6 +330,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       isSyncing,
       isApplyingRemote,
       importPromptOpen,
+      initialSyncComplete,
       registerSyncHandlers,
       scheduleTasksPush,
       scheduleHistoryPush,

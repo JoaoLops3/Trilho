@@ -328,21 +328,30 @@ export async function syncNotificationsToCloud(
   const supabase = getSupabase();
   if (!supabase) return;
 
-  const rows = notifications.map((n) => notificationToRow(n, userId));
-  const ids = new Set(notifications.map((n) => n.id));
+  // Identidade estável no DB é (user_id, dedup_key) — o id local inclui
+  // timestamp e muda entre devices. Upsert pela PK causava 409 Conflict.
+  const byDedup = new Map<string, AppNotification>();
+  for (const notification of notifications) {
+    byDedup.set(notification.dedupKey, notification);
+  }
+  const unique = [...byDedup.values()];
+  const rows = unique.map((n) => notificationToRow(n, userId));
+  const dedupKeys = new Set(unique.map((n) => n.dedupKey));
 
   if (rows.length > 0) {
-    await supabase.from("notifications").upsert(rows);
+    await supabase.from("notifications").upsert(rows, {
+      onConflict: "user_id,dedup_key",
+    });
   }
 
   const { data: existing } = await supabase
     .from("notifications")
-    .select("id")
+    .select("id, dedup_key")
     .eq("user_id", userId);
 
   const staleIds =
     existing
-      ?.filter((row) => !ids.has(row.id as string))
+      ?.filter((row) => !dedupKeys.has(row.dedup_key as string))
       .map((row) => row.id as string) ?? [];
 
   if (staleIds.length > 0) {

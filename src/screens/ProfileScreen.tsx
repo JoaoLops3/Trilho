@@ -13,6 +13,7 @@ import {
   ChevronRight,
   ImageIcon,
   Repeat,
+  Sparkles,
   type LucideIcon,
   Pencil,
 } from "lucide-react";
@@ -233,6 +234,13 @@ export function ProfileScreen() {
                   label="Minhas rotinas"
                   onClick={() =>
                     history.push("/rotinas", tabNavigationState("profile"))
+                  }
+                />
+                <SettingsRow
+                  icon={Sparkles}
+                  label="Montar nova rotina"
+                  onClick={() =>
+                    history.push("/rotina/montar", tabNavigationState("profile"))
                   }
                 />
                 <SettingsRow
