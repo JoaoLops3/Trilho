@@ -39,6 +39,7 @@ import {
   getTimerFinishAt,
   scheduledDateToday,
 } from "./notification-scheduler";
+import { taskDay } from "./week-utils";
 
 export type NotificationPermissionState =
   | "granted"
@@ -129,7 +130,11 @@ function buildNativePayloads(
   const minScheduleMs = now.getTime() + 5_000;
   const copyOptions = { hideTaskContent: prefs.hideTaskContent };
 
+  const today = dayKey(now);
+
   for (const task of tasks) {
+    if (taskDay(task, today) !== today) continue;
+
     if (
       task.scheduledTime &&
       (task.status === "pending" || task.status === "paused") &&

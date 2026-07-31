@@ -7,12 +7,17 @@ import { TaskCard } from "../components/TaskCard";
 import { ProgressRing } from "../components/ProgressRing";
 import { OrbBackground } from "../components/OrbBackground";
 import { captureEvent } from "../lib/posthog";
-import { computeFocusSeconds, sortByScheduledTime } from "../lib/day-stats";
+import {
+  computeFocusSeconds,
+  dayKey,
+  sortByScheduledTime,
+} from "../lib/day-stats";
 import { formatTimerDisplay } from "../lib/task-duration";
 import { useDailyGoal } from "../lib/use-daily-goal";
 import { useActiveElapsed, useTasks } from "../lib/tasks-context";
 import { useProfile } from "../lib/profile-context";
 import { getShownName } from "../lib/profile-storage";
+import { taskDay } from "../lib/week-utils";
 
 function getGreeting(): string {
   const hour = new Date().getHours();
@@ -80,8 +85,11 @@ export function DashboardScreen() {
     ? Math.max(activeTask.duration - liveElapsed, 0)
     : 0;
 
+  const today = dayKey();
   const upcomingTasks = sortByScheduledTime(
-    tasks.filter((t) => t.status === "pending"),
+    tasks.filter(
+      (t) => t.status === "pending" && taskDay(t, today) === today,
+    ),
   );
   // Sem scroll: mostra até 3 próximas na home.
   const visibleUpcoming = upcomingTasks.slice(0, 3);

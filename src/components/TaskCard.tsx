@@ -27,6 +27,8 @@ export interface Task {
   status: TaskStatus;
   priority: TaskPriority;
   scheduledTime?: string;
+  /** Dia agendado "YYYY-MM-DD" (tarefa avulsa). Ausente = dia corrente. */
+  scheduledDate?: string;
   /** ISO 8601 — preenchido ao concluir a tarefa */
   completedAt?: string;
   /** Id do template quando a tarefa é instância de uma rotina recorrente. */

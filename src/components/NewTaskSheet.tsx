@@ -1,14 +1,20 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "../lib/motion";
 import { Clock, X } from "lucide-react";
 import { DurationFields } from "./DurationFields";
 import { WeekdayPicker } from "./WeekdayPicker";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
+import { dayKey } from "../lib/day-stats";
 import {
   DEFAULT_DURATION_SECONDS,
   validateDurationSeconds,
 } from "../lib/task-duration";
+import {
+  dayNumber,
+  getWeekDays,
+  weekdayShortLabel,
+} from "../lib/week-utils";
 import type { Task, TaskPriority } from "./TaskCard";
 import type { RoutineTemplate, RoutineTemplateInput } from "../types/routine";
 
@@ -17,6 +23,8 @@ interface NewTaskSheetProps {
   onClose: () => void;
   onSubmit: (task: Task) => void;
   taskToEdit?: Task | null;
+  /** Dia pré-selecionado ao criar (ex.: dia ativo na Agenda). */
+  defaultScheduledDate?: string;
   /** Habilita o modo "Repetir" (criação de rotina) no seletor do topo. */
   allowRoutineMode?: boolean;
   /** Força o modo rotina sem seletor (criação a partir de "Minhas rotinas"). */
@@ -57,6 +65,7 @@ export function NewTaskSheet({
   onClose,
   onSubmit,
   taskToEdit,
+  defaultScheduledDate,
   allowRoutineMode = false,
   routineOnly = false,
   onSubmitRoutine,
@@ -71,6 +80,7 @@ export function NewTaskSheet({
     DEFAULT_DURATION_SECONDS,
   );
   const [scheduledTime, setScheduledTime] = useState("");
+  const [scheduledDate, setScheduledDate] = useState(dayKey());
   const [priority, setPriority] = useState<TaskPriority>("medium");
   const [weekdays, setWeekdays] = useState<number[]>(DEFAULT_ROUTINE_WEEKDAYS);
 
@@ -80,6 +90,12 @@ export function NewTaskSheet({
   const isEditing = isEditingTask || isEditingRoutine;
   const showModeToggle = allowRoutineMode && !isEditing && !routineOnly;
   const isRoutine = mode === "routine";
+  const today = dayKey();
+
+  const dateChipDays = useMemo(() => {
+    const anchorDay = scheduledDate || defaultScheduledDate || today;
+    return getWeekDays(new Date(`${anchorDay}T00:00:00`));
+  }, [scheduledDate, defaultScheduledDate, today]);
 
   useEffect(() => {
     if (isOpen) {
@@ -97,6 +113,7 @@ export function NewTaskSheet({
         setCategory(taskToEdit.category);
         setDurationSeconds(taskToEdit.duration);
         setScheduledTime(taskToEdit.scheduledTime ?? "");
+        setScheduledDate(taskToEdit.scheduledDate ?? today);
         setPriority(taskToEdit.priority);
       } else {
         setMode(routineOnly ? "routine" : "task");
@@ -104,6 +121,7 @@ export function NewTaskSheet({
         setCategory(categories[0]);
         setDurationSeconds(DEFAULT_DURATION_SECONDS);
         setScheduledTime("");
+        setScheduledDate(defaultScheduledDate ?? today);
         setPriority("medium");
         setWeekdays(DEFAULT_ROUTINE_WEEKDAYS);
       }
@@ -113,7 +131,7 @@ export function NewTaskSheet({
       }, 320);
       return () => window.clearTimeout(focusTimer);
     }
-  }, [isOpen, taskToEdit, routineToEdit, routineOnly]);
+  }, [isOpen, taskToEdit, routineToEdit, routineOnly, defaultScheduledDate, today]);
 
   const trimmedTitle = title.trim();
   const durationError = validateDurationSeconds(durationSeconds);
@@ -141,6 +159,7 @@ export function NewTaskSheet({
       return;
     }
 
+    const resolvedDate = scheduledDate || today;
     const task: Task = taskToEdit
       ? {
           ...taskToEdit,
@@ -150,6 +169,7 @@ export function NewTaskSheet({
           elapsed: Math.min(taskToEdit.elapsed, duration),
           priority,
           scheduledTime: scheduledTime || undefined,
+          scheduledDate: resolvedDate === today ? undefined : resolvedDate,
         }
       : {
           id: createId(),
@@ -160,6 +180,8 @@ export function NewTaskSheet({
           status: "pending",
           priority,
           scheduledTime: scheduledTime || undefined,
+          // Legado: hoje sem campo; dias futuros/passados persistem scheduledDate.
+          scheduledDate: resolvedDate === today ? undefined : resolvedDate,
         };
     onSubmit(task);
     onClose();
@@ -238,13 +260,54 @@ export function NewTaskSheet({
                         : "text-obsidian-300 border border-transparent hover:bg-white/[0.06]"
                     }`}
                   >
-                    {option === "task" ? "Só hoje" : "Repetir"}
+                    {option === "task" ? "Avulsa" : "Repetir"}
                   </button>
                 ))}
               </div>
             )}
 
             <div className="space-y-4">
+              {!isRoutine && (
+                <div>
+                  <label className="block text-xs text-obsidian-400 uppercase tracking-wide mb-2">
+                    Dia
+                  </label>
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setScheduledDate(today)}
+                      className={`px-3 py-2 rounded-xl text-sm font-medium transition-colors touch-manipulation ${
+                        scheduledDate === today
+                          ? "bg-mint-500/20 text-mint-400 border border-mint-500/40"
+                          : "bg-white/[0.04] text-obsidian-300 border border-white/10 hover:bg-white/[0.08]"
+                      }`}
+                    >
+                      Hoje
+                    </button>
+                    {dateChipDays.map((day) => (
+                      <button
+                        key={day}
+                        type="button"
+                        onClick={() => setScheduledDate(day)}
+                        className={`min-w-[2.75rem] px-2.5 py-2 rounded-xl text-sm font-medium transition-colors touch-manipulation ${
+                          scheduledDate === day
+                            ? "bg-mint-500/20 text-mint-400 border border-mint-500/40"
+                            : "bg-white/[0.04] text-obsidian-300 border border-white/10 hover:bg-white/[0.08]"
+                        }`}
+                        aria-label={`${weekdayShortLabel(day)} ${dayNumber(day)}`}
+                      >
+                        <span className="block text-[10px] leading-none text-obsidian-500 uppercase">
+                          {weekdayShortLabel(day)}
+                        </span>
+                        <span className="block tabular-nums mt-0.5">
+                          {dayNumber(day)}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div>
                 <label className="block text-xs text-obsidian-400 uppercase tracking-wide mb-2">
                   Título

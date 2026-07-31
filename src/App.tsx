@@ -88,7 +88,13 @@ function RouteFallback() {
 }
 
 function GlobalTaskSheet() {
-  const { isNewTaskOpen, taskToEdit, closeTaskSheet, submitTask } = useTasks();
+  const {
+    isNewTaskOpen,
+    taskToEdit,
+    createTaskDatePrefill,
+    closeTaskSheet,
+    submitTask,
+  } = useTasks();
   const { createRoutine } = useRoutines();
   return (
     <NewTaskSheet
@@ -96,6 +102,7 @@ function GlobalTaskSheet() {
       onClose={closeTaskSheet}
       onSubmit={submitTask}
       taskToEdit={taskToEdit}
+      defaultScheduledDate={createTaskDatePrefill ?? undefined}
       allowRoutineMode={!taskToEdit}
       onSubmitRoutine={(input) => createRoutine(input)}
     />
@@ -112,7 +119,8 @@ function AppRoutes() {
     () =>
       tasks
         .map(
-          (t) => `${t.id}:${t.status}:${t.scheduledTime ?? ""}:${t.duration}`,
+          (t) =>
+            `${t.id}:${t.status}:${t.scheduledTime ?? ""}:${t.scheduledDate ?? ""}:${t.duration}`,
         )
         .join("|"),
     [tasks],
