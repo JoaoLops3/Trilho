@@ -34,11 +34,17 @@ O app **sempre** grava local primeiro (cache offline). Quando autenticado, envia
 
 ## O que sincroniza
 
-- Tarefas (`tasks`)
+- Tarefas (`tasks`), incluindo `scheduled_date` (dia da agenda) e campos de rotina
 - Histórico diário (`day_history`)
 - Perfil / avatar (`profiles`)
 - Preferências de notificação (`notification_preferences`)
 - Inbox in-app (`notifications`)
+- Templates de rotina (`routine_templates`)
+
+### Compatibilidade `scheduled_date`
+
+- Coluna nullable: app antigo sem o campo continua fazendo upsert sem quebrar.
+- Janela pequena: task criada num device novo com `scheduledDate` e editada num app antigo (spread de `Task` sem o campo) pode perder `scheduled_date` no próximo upsert — aceitável até todos os devices atualizarem.
 
 ## O que **não** sincroniza nesta fase
 

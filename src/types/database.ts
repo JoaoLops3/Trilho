@@ -67,6 +67,7 @@ export interface Database {
           status: TaskStatus;
           priority: TaskPriority;
           scheduled_time: string | null;
+          scheduled_date: string | null;
           completed_at: string | null;
           routine_template_id: string | null;
           routine_date: string | null;
@@ -83,6 +84,7 @@ export interface Database {
           status?: TaskStatus;
           priority?: TaskPriority;
           scheduled_time?: string | null;
+          scheduled_date?: string | null;
           completed_at?: string | null;
           routine_template_id?: string | null;
           routine_date?: string | null;
@@ -99,6 +101,7 @@ export interface Database {
           status?: TaskStatus;
           priority?: TaskPriority;
           scheduled_time?: string | null;
+          scheduled_date?: string | null;
           completed_at?: string | null;
           routine_template_id?: string | null;
           routine_date?: string | null;

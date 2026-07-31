@@ -180,12 +180,16 @@ export function isTaskCompletedOnDay(
   );
 }
 
-/** Tarefas do dia: pendentes/ativas/pausadas + concluídas hoje (arquivo antigo fica de fora). */
+/** Tarefas do dia: pendentes/ativas/pausadas do dia + concluídas nesse dia. */
 export function isTaskInTodayAgenda(
   task: Task,
   day: string = dayKey(),
 ): boolean {
-  if (task.status !== "completed") return true;
+  if (task.status !== "completed") {
+    // Mesma regra de week-utils.taskDay (evita import circular day-stats ↔ week-utils).
+    const assignedDay = task.scheduledDate ?? task.routineDate ?? day;
+    return assignedDay === day;
+  }
   return isTaskCompletedOnDay(task, day);
 }
 

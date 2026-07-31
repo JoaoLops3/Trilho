@@ -86,7 +86,11 @@ interface TasksContextValue {
   streak: number;
   isNewTaskOpen: boolean;
   taskToEdit: Task | null;
-  openNewTask: () => void;
+  /** Dia pré-selecionado ao abrir o sheet de nova tarefa (Agenda). */
+  createTaskDatePrefill: string | null;
+  /** Agenda registra o dia selecionado para o botão + da tab bar herdar. */
+  setCreateTaskDatePrefill: (day: string | null) => void;
+  openNewTask: (options?: { scheduledDate?: string }) => void;
   editTask: (id: string) => void;
   closeTaskSheet: () => void;
   submitTask: (task: Task) => void;
@@ -133,6 +137,9 @@ export function TasksProvider({ children }: { children: ReactNode }) {
   const [streak, setStreak] = useState(() => computeStreak(loadHistory()));
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
+  const [createTaskDatePrefill, setCreateTaskDatePrefill] = useState<
+    string | null
+  >(null);
   const [
     notificationPermissionPromptOpen,
     setNotificationPermissionPromptOpen,
@@ -407,8 +414,11 @@ export function TasksProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const openNewTask = useCallback(() => {
+  const openNewTask = useCallback((options?: { scheduledDate?: string }) => {
     setEditingTaskId(null);
+    if (options?.scheduledDate) {
+      setCreateTaskDatePrefill(options.scheduledDate);
+    }
     setIsNewTaskOpen(true);
   }, []);
 
@@ -488,6 +498,8 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       streak,
       isNewTaskOpen,
       taskToEdit,
+      createTaskDatePrefill,
+      setCreateTaskDatePrefill,
       openNewTask,
       editTask,
       closeTaskSheet,
@@ -504,6 +516,7 @@ export function TasksProvider({ children }: { children: ReactNode }) {
       streak,
       isNewTaskOpen,
       taskToEdit,
+      createTaskDatePrefill,
       openNewTask,
       editTask,
       closeTaskSheet,

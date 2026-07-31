@@ -1,5 +1,7 @@
 import type { Task } from "../components/TaskCard";
+import { dayKey } from "./day-stats";
 import type { LeadMinutes } from "./notification-preferences";
+import { taskDay } from "./week-utils";
 
 export function parseScheduledMinutes(time?: string): number | null {
   if (!time) return null;
@@ -25,6 +27,10 @@ export function scheduledDateToday(
   return date;
 }
 
+function isTaskForToday(task: Task, now: Date): boolean {
+  return taskDay(task, dayKey(now)) === dayKey(now);
+}
+
 export function getUpcomingTaskReminders(
   tasks: Task[],
   now: Date = new Date(),
@@ -33,6 +39,7 @@ export function getUpcomingTaskReminders(
   const nowMinutes = minutesOfDay(now);
   return tasks.filter((task) => {
     if (task.status !== "pending" && task.status !== "paused") return false;
+    if (!isTaskForToday(task, now)) return false;
     const scheduled = parseScheduledMinutes(task.scheduledTime);
     if (scheduled === null) return false;
     return nowMinutes >= scheduled - leadMinutes && nowMinutes <= scheduled;
@@ -43,6 +50,7 @@ export function getOverdueTasks(tasks: Task[], now: Date = new Date()): Task[] {
   const nowMinutes = minutesOfDay(now);
   return tasks.filter((task) => {
     if (task.status !== "pending") return false;
+    if (!isTaskForToday(task, now)) return false;
     const scheduled = parseScheduledMinutes(task.scheduledTime);
     if (scheduled === null) return false;
     return nowMinutes > scheduled;
