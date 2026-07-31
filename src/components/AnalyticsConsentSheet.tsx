@@ -21,7 +21,10 @@ export function AnalyticsConsentSheet() {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(() => getAnalyticsConsent() === null);
 
-  const visible = isOpen && !isAuthRoute(location.pathname);
+  const visible =
+    isOpen &&
+    !isAuthRoute(location.pathname) &&
+    location.pathname !== "/rotina/montar";
 
   const handleAccept = () => {
     setAnalyticsConsent(true);
