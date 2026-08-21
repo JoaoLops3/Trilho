@@ -1,6 +1,7 @@
-<img src="public/trilho-logo.png" alt="Logo do Trilho" width="96" />
-
-# Trilho
+<div align="center">
+  <img src="public/trilho-logo.png" alt="Logo do Trilho" width="96" />
+  <h1>Trilho</h1>
+</div>
 
 **Sua rotina, sobre trilhos.**  
 App de produtividade para quem tem dificuldade em manter foco e organização no dia a dia — com sequência (streak) gamificada e não punitiva.
