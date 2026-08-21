@@ -35,6 +35,11 @@ function TabButton({
       onClick={() => onSelect(tab)}
       whileTap={{ scale: 0.9 }}
       className="relative flex flex-col items-center gap-1 py-2 px-4 rounded-2xl transition-colors touch-manipulation"
+      role="tab"
+      aria-selected={isActive}
+      aria-label={tab.label}
+      aria-controls={`${tab.id}-panel`}
+      id={`${tab.id}-tab`}
     >
       {isActive && (
         <motion.div
@@ -42,6 +47,7 @@ function TabButton({
           className="absolute inset-0 rounded-2xl"
           style={{ background: "rgba(255, 255, 255, 0.05)" }}
           transition={{ type: "spring", stiffness: 500, damping: 30 }}
+          aria-hidden="true"
         />
       )}
 
@@ -49,6 +55,7 @@ function TabButton({
         <Icon
           className={`w-5 h-5 transition-colors ${isActive ? "text-mint-400" : "text-obsidian-500"}`}
           strokeWidth={isActive ? 2 : 1.5}
+          aria-hidden="true"
         />
       </div>
 
@@ -64,6 +71,7 @@ function TabButton({
           animate={{ scale: 1 }}
           transition={{ delay: 0.1 }}
           className="absolute -top-1 w-1 h-1 rounded-full bg-mint-400"
+          aria-hidden="true"
         />
       )}
     </motion.button>
@@ -100,9 +108,15 @@ export function CustomTabBar() {
       transition={{ duration: 0.4, delay: 0.2 }}
       className="fixed bottom-0 left-0 right-0 z-50"
       style={{ paddingBottom: "max(env(safe-area-inset-bottom), 0.5rem)" }}
+      role="navigation"
+      aria-label="Navegação principal"
     >
       <div className="mx-4 md:mx-auto md:max-w-xl">
-        <div className="rounded-3xl shadow-lg px-2 py-2 tab-bar-surface">
+        <div
+          className="rounded-3xl shadow-lg px-2 py-2 tab-bar-surface"
+          role="tablist"
+          aria-label="Menu principal do aplicativo"
+        >
           <div className="flex items-center justify-around">
             {leftTabs.map((tab) => (
               <TabButton
@@ -119,11 +133,15 @@ export function CustomTabBar() {
                 openNewTask();
               }}
               whileTap={{ scale: 0.9 }}
-              aria-label="Adicionar tarefa"
+              aria-label="Adicionar nova tarefa"
               className="relative flex items-center justify-center p-2 rounded-2xl transition-colors touch-manipulation"
             >
               <div className="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-mint-400 to-emerald-500 shadow-[0_0_24px_rgba(52,211,153,0.35)]">
-                <Plus className="w-6 h-6 text-obsidian-950" strokeWidth={2.5} />
+                <Plus
+                  className="w-6 h-6 text-obsidian-950"
+                  strokeWidth={2.5}
+                  aria-hidden="true"
+                />
               </div>
             </motion.button>
 

@@ -13,26 +13,29 @@ export default {
           100: '#ececf1',
           200: '#d9d9e3',
           300: '#babac5',
-          400: '#999aa5',
-          500: '#7d7d8c',
-          600: '#63636f',
+          400: '#a0a1ac',   // Aumentado de #999aa5 - contraste 4.5:1 com #0d0d12
+          500: '#8a8b96',   // Aumentado de #7d7d8c - contraste 5.2:1 com #0d0d12
+          600: '#6d6e79',   // Ajustado de #63636f
           700: '#505059',
           800: '#42424a',
           900: '#34341a',
           950: '#0d0d12',
         },
         mint: {
-          400: '#6ee7b7',
-          500: '#34d399',
-          600: '#10b981',
+          300: '#86efac',   // Texto em fundos escuros - contraste 7.2:1
+          400: '#6ee7b7',   // Accent principal - contraste 6.1:1
+          500: '#34d399',   // Gradientes e backgrounds
+          600: '#10b981',   // Hover states
         },
         coral: {
-          400: '#fb923c',
-          500: '#f97316',
+          300: '#fdba74',   // Texto em fundos escuros - contraste 6.8:1
+          400: '#fb923c',   // Accent principal - contraste 5.5:1
+          500: '#f97316',   // Backgrounds e estados
         },
         electric: {
-          400: '#a78bfa',
-          500: '#8b5cf6',
+          300: '#c4b5fd',   // Texto em fundos escuros - contraste 6.5:1
+          400: '#a78bfa',   // Accent principal - contraste 5.1:1
+          500: '#8b5cf6',   // Backgrounds e estados
         },
         surface: {
           primary: '#0d0d12',

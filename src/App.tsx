@@ -13,6 +13,8 @@ const DashboardScreen = lazy(() =>
 import { CustomTabBar } from "./components/CustomTabBar";
 import { NewTaskSheet } from "./components/NewTaskSheet";
 import { NativeNotificationBridge } from "./components/NativeNotificationBridge";
+import { ScreenLoadingSkeleton } from "./components/ScreenLoadingSkeleton";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { TasksProvider, useTasks } from "./lib/tasks-context";
 import { RoutinesProvider, useRoutines } from "./lib/routines-context";
 import { AuthProvider, isAuthRoute } from "./lib/auth-context";
@@ -20,6 +22,7 @@ import { AuthGate } from "./components/AuthGate";
 import { SyncProvider } from "./lib/sync-context";
 import { ProfileProvider } from "./lib/profile-context";
 import { NotificationsProvider } from "./lib/notifications-context";
+import { ToastProvider } from "./lib/toast-context";
 import { ImportLocalDataSheet } from "./components/ImportLocalDataSheet";
 import { NotificationPermissionSheet } from "./components/NotificationPermissionSheet";
 import { AnalyticsConsentSheet } from "./components/AnalyticsConsentSheet";
@@ -77,16 +80,6 @@ setupIonicReact({
   hardwareBackButton: true,
 });
 
-function RouteFallback() {
-  return (
-    <div
-      className="fixed inset-0 z-0"
-      style={{ backgroundColor: "#0d0d12" }}
-      aria-hidden="true"
-    />
-  );
-}
-
 function GlobalTaskSheet() {
   const {
     isNewTaskOpen,
@@ -134,45 +127,165 @@ function AppRoutes() {
   return (
     <>
       <AuthGate>
-        <Suspense fallback={<RouteFallback />}>
-          <IonRouterOutlet animated={false}>
-            <Switch>
-              <Route exact path="/" component={DashboardScreen} />
-              <Route exact path="/agenda" component={AgendaScreen} />
-              <Route exact path="/stats" component={StatsScreen} />
-              <Route exact path="/perfil" component={ProfileScreen} />
-              <Route
-                exact
-                path="/notificacoes"
-                component={NotificationsScreen}
-              />
-              <Route exact path="/preferencias" component={SettingsScreen} />
-              <Route exact path="/rotinas" component={RoutinesScreen} />
-              <Route
-                exact
-                path="/rotina/montar"
-                component={OnboardingRoutineScreen}
-              />
-              <Route
-                exact
-                path="/privacidade"
-                component={PrivacyPolicyScreen}
-              />
-              <Route
-                exact
-                path="/notificacoes/preferencias"
-                component={NotificationPreferencesScreen}
-              />
-              <Route exact path="/login" component={LoginScreen} />
-              <Route exact path="/cadastro" component={SignUpScreen} />
-              <Route
-                exact
-                path="/recuperar-senha"
-                component={ForgotPasswordScreen}
-              />
-            </Switch>
-          </IonRouterOutlet>
-        </Suspense>
+        <IonRouterOutlet animated={false}>
+          <Switch>
+            <Route
+              exact
+              path="/"
+              render={() => (
+                <ErrorBoundary context="dashboard">
+                  <Suspense
+                    fallback={<ScreenLoadingSkeleton variant="dashboard" />}
+                  >
+                    <DashboardScreen />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/agenda"
+              render={() => (
+                <ErrorBoundary context="agenda">
+                  <Suspense
+                    fallback={<ScreenLoadingSkeleton variant="agenda" />}
+                  >
+                    <AgendaScreen />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/stats"
+              render={() => (
+                <ErrorBoundary context="stats">
+                  <Suspense fallback={<ScreenLoadingSkeleton variant="stats" />}>
+                    <StatsScreen />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/perfil"
+              render={() => (
+                <ErrorBoundary context="profile">
+                  <Suspense
+                    fallback={<ScreenLoadingSkeleton variant="profile" />}
+                  >
+                    <ProfileScreen />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/notificacoes"
+              render={() => (
+                <ErrorBoundary context="notifications">
+                  <Suspense
+                    fallback={<ScreenLoadingSkeleton variant="dashboard" />}
+                  >
+                    <NotificationsScreen />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/preferencias"
+              render={() => (
+                <ErrorBoundary context="settings">
+                  <Suspense
+                    fallback={<ScreenLoadingSkeleton variant="profile" />}
+                  >
+                    <SettingsScreen />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/rotinas"
+              render={() => (
+                <ErrorBoundary context="routines">
+                  <Suspense
+                    fallback={<ScreenLoadingSkeleton variant="agenda" />}
+                  >
+                    <RoutinesScreen />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/rotina/montar"
+              render={() => (
+                <ErrorBoundary context="routines-onboarding">
+                  <Suspense
+                    fallback={<ScreenLoadingSkeleton variant="agenda" />}
+                  >
+                    <OnboardingRoutineScreen />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/privacidade"
+              render={() => (
+                <ErrorBoundary context="privacy">
+                  <Suspense
+                    fallback={<ScreenLoadingSkeleton variant="profile" />}
+                  >
+                    <PrivacyPolicyScreen />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/notificacoes/preferencias"
+              render={() => (
+                <ErrorBoundary context="notification-preferences">
+                  <Suspense
+                    fallback={<ScreenLoadingSkeleton variant="profile" />}
+                  >
+                    <NotificationPreferencesScreen />
+                  </Suspense>
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/login"
+              render={() => (
+                <ErrorBoundary context="login">
+                  <LoginScreen />
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/cadastro"
+              render={() => (
+                <ErrorBoundary context="signup">
+                  <SignUpScreen />
+                </ErrorBoundary>
+              )}
+            />
+            <Route
+              exact
+              path="/recuperar-senha"
+              render={() => (
+                <ErrorBoundary context="password-recovery">
+                  <ForgotPasswordScreen />
+                </ErrorBoundary>
+              )}
+            />
+          </Switch>
+        </IonRouterOutlet>
       </AuthGate>
       {showTabBar ? <CustomTabBar /> : null}
       <GlobalTaskSheet />
@@ -230,21 +343,23 @@ function App() {
   return (
     <MotionProvider>
       <IonApp>
-        <AuthProvider>
-          <SyncProvider>
-            <ProfileProvider>
-              <RoutinesProvider>
-                <TasksProvider>
-                  <NotificationsProvider>
-                    <IonReactRouter>
-                      <AppRoutes />
-                    </IonReactRouter>
-                  </NotificationsProvider>
-                </TasksProvider>
-              </RoutinesProvider>
-            </ProfileProvider>
-          </SyncProvider>
-        </AuthProvider>
+        <ToastProvider>
+          <AuthProvider>
+            <SyncProvider>
+              <ProfileProvider>
+                <RoutinesProvider>
+                  <TasksProvider>
+                    <NotificationsProvider>
+                      <IonReactRouter>
+                        <AppRoutes />
+                      </IonReactRouter>
+                    </NotificationsProvider>
+                  </TasksProvider>
+                </RoutinesProvider>
+              </ProfileProvider>
+            </SyncProvider>
+          </AuthProvider>
+        </ToastProvider>
       </IonApp>
     </MotionProvider>
   );

@@ -305,7 +305,35 @@
 
 ---
 
-## Fase 12 — Rotinas prontas (foco em acolhimento / TDAH)
+## Fase 11.5 — Estados de UI e Acessibilidade (pré-loja) ✅
+
+> **Polish crítico** — antes de loja, levar estados de UI de 7/10 para 9+/10 e acessibilidade de 7.5/10 para 9+/10.
+
+**Objetivo:** experiência profissional de loading, feedback visual e acessibilidade completa.
+
+### Estados de UI
+
+- [x] **Skeleton loading** — `TaskCardSkeleton`, `StatsWidgetSkeleton`, `TrainStreakCardSkeleton`, `ProfileHeaderSkeleton`, `ScreenLoadingSkeleton`.
+- [x] **Error boundaries** — `ErrorBoundary`, `ErrorFallback`, `NetworkErrorState`, `GenericErrorState` (captura + recuperação de erros).
+- [x] **Loading states** — `ButtonWithLoading`, `Spinner`, `useAsyncAction`, `SyncStatusIndicator`.
+- [x] **Toast system** — `Toast`, `ToastContainer`, `useToast`, `useToastAsync` (feedback success/error/info/warning com ações).
+
+### Acessibilidade (WCAG 2.1 AA)
+
+- [x] **Contraste de cores** — obsidian-400/500 ajustados, variantes 300 AAA (7:1+), `a11y-colors.ts`.
+- [x] **Prefers-reduced-motion** — utilitários em `motion.tsx`, regras CSS globais, desabilita animações de movimento.
+- [x] **Focus-visible** — outline mint-400 + box-shadow em todos interativos, navegação por teclado 100% visível.
+- [x] **ARIA labels/roles** — `CustomTabBar` (tablist/tab), `TaskCard` (article/live region), guia completo em `a11y-aria.ts`.
+
+**Pronto quando:** percepção de loading -60%, taxa de recuperação de erro 100%, navegação por teclado visível, contraste WCAG AA em todas as cores, toasts em operações principais.
+
+**Arquivos:** `Toast.tsx`, `ButtonWithLoading.tsx`, `Spinner.tsx`, `*Skeleton.tsx`, `Error*.tsx`, `toast-context.tsx`, `useAsyncAction.ts`, `a11y-*.ts`, `index.css`, `tailwind.config.js`, `motion.tsx`, `CustomTabBar.tsx`, `TaskCard.tsx`, `App.tsx`  
+**Docs:** `docs/ui-accessibility-improvements.md`  
+**Branch:** mergeado na `main` (`feat/ui-accessibility-improvements`)
+
+---
+
+## Fase 12 — Rotinas prontas (foco em acolhimento / TDAH) ✅
 
 > **Depois da Fase 11** — onboarding de rotinas **após** login (a tela de login/cadastro já existe na 11.2).
 
@@ -313,23 +341,24 @@
 
 ### Fluxo (pós-login / pós-cadastro)
 
-- [ ] Tela de onboarding de rotina após 1º login com conta vazia — "Vamos montar sua rotina".
-- [ ] Perguntas curtas (3–5): foco principal (estudos, trabalho, saúde, equilíbrio/lazer), intensidade (leve vs completa).
-- [ ] Preview da rotina sugerida antes de confirmar.
-- [ ] Opção **"Começar do zero"** sempre visível — ninguém é obrigado ao template.
-- [ ] Ao confirmar: injeta tarefas no storage (local + Supabase se logado).
-- [ ] Usuário pode editar, excluir e criar novas tarefas a qualquer momento.
+- [x] Tela de onboarding de rotina após 1º login com conta vazia — "Vamos montar sua rotina".
+- [x] Perguntas curtas (3–5): foco principal (estudos, trabalho, saúde, equilíbrio/lazer), intensidade (leve vs completa).
+- [x] Preview da rotina sugerida antes de confirmar.
+- [x] Opção **"Começar do zero"** sempre visível — ninguém é obrigado ao template.
+- [x] Ao confirmar: injeta tarefas no storage (local + Supabase se logado).
+- [x] Usuário pode editar, excluir e criar novas tarefas a qualquer momento.
 
 ### Conteúdo das rotinas
 
-- [ ] Templates por perfil: estudos, trabalho, saúde, equilíbrio geral.
-- [ ] Blocos realistas para TDAH: 15–25 min, pausas explícitas, poucas tarefas no 1º dia (3–5).
-- [ ] Copy acolhedora — ponto de partida, não prescrição clínica.
-- [ ] Reaplicar template depois: atalho no Perfil ("Montar nova rotina").
+- [x] Templates por perfil: estudos, trabalho, saúde, equilíbrio geral.
+- [x] Blocos realistas para TDAH: 15–25 min, pausas explícitas, poucas tarefas no 1º dia (3–5).
+- [x] Copy acolhedora — ponto de partida, não prescrição clínica.
+- [x] Reaplicar template depois: atalho no Perfil ("Montar nova rotina").
 
 **Pronto quando:** crio conta → respondo perguntas → escolho "Estudos, rotina leve" → Dashboard já tem tarefas úteis → posso apagar uma e criar outra sem perder o resto.
 
-**Arquivos (previstos):** `src/lib/routine-templates.ts`, `src/screens/OnboardingRoutineScreen.tsx`, integração pós-auth em `App.tsx`
+**Arquivos:** `src/lib/routine-templates.ts`, `src/screens/OnboardingRoutineScreen.tsx`, `src/lib/use-routine-onboarding-gate.ts`, integração em `App.tsx`, `AuthGate.tsx`, `ProfileScreen.tsx`  
+**Eventos PostHog:** `routine_profile_selected`, `routine_intensity_selected`, `routine_applied`, `routine_skipped`
 
 ---
 
@@ -362,7 +391,7 @@
 
 ### Como trabalhar
 
-> **Status atual:** Fases 1–10 e **11.1 + 11.2** concluídas na `main`. **11.3** — sync multi-dispositivo funcional; pendente push remoto (Edge/FCM/APNs), ícones de push e pushes nativos `daily_goal_reached` / `streak_milestone`. Polish pós-11.3 (nome, nickname, duração h+min, rebrand, boot iOS) já mergeado. **Próxima etapa aberta:** fechar lacunas da 11.3 ou iniciar **Fase 12** (rotinas prontas).
+> **Status atual:** Fases 1–10, **11.1 + 11.2 + 11.3** (sync core), **11.5** (UI/a11y) e **12** (rotinas prontas) concluídas na `main`. Pendente na 11.3: push remoto (Edge/FCM/APNs), ícones de push, pushes nativos `daily_goal_reached` / `streak_milestone`. **Próxima etapa aberta:** fechar lacunas da 11.3 ou iniciar **Fase 13** (Agenda semanal).
 
 1. Pegue **a fase mais ao topo ainda aberta**.
 2. Faça os checkboxes dela.

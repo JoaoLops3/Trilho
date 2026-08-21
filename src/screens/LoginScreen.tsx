@@ -5,6 +5,7 @@ import { IonPage, IonContent } from "@ionic/react";
 import { OrbBackground } from "../components/OrbBackground";
 import { AppLogo } from "../components/AppLogo";
 import { AuthFormField } from "../components/AuthFormField";
+import { ButtonWithLoading } from "../components/ButtonWithLoading";
 import { useAuth } from "../lib/auth-context";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
 import { APP_NAME, APP_TAGLINE, APP_VERSION } from "../lib/app-brand";
@@ -152,14 +153,8 @@ export function LoginScreen() {
     }
   };
 
-  const submitLabel =
-    mode === "login"
-      ? isSubmitting
-        ? "Entrando…"
-        : "Entrar"
-      : isSubmitting
-        ? "Criando conta…"
-        : "Criar conta";
+  const submitLabel = mode === "login" ? "Entrar" : "Criar conta";
+  const loadingLabel = mode === "login" ? "Entrando" : "Criando conta";
 
   const keyboardInset = useKeyboardInset(true);
   const keyboardOpen = keyboardInset > 0;
@@ -326,13 +321,16 @@ export function LoginScreen() {
                     </p>
                   ) : null}
 
-                  <button
+                  <ButtonWithLoading
                     type="submit"
-                    disabled={isSubmitting || Boolean(successMessage)}
-                    className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-50 touch-manipulation"
+                    variant="primary"
+                    fullWidth
+                    isLoading={isSubmitting}
+                    disabled={Boolean(successMessage)}
+                    loadingLabel={loadingLabel}
                   >
                     {submitLabel}
-                  </button>
+                  </ButtonWithLoading>
 
                   {mode === "login" ? (
                     <p className="text-center text-sm pt-1">

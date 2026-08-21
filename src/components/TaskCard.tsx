@@ -123,6 +123,10 @@ export const TaskCard = memo(
             ? "ring-2 ring-mint-400/60 ring-offset-2 ring-offset-surface-primary"
             : ""
         }`}
+        role="article"
+        aria-label={`Tarefa: ${task.title}`}
+        aria-live={isActive ? "polite" : undefined}
+        aria-atomic={isActive ? "true" : undefined}
       >
         {isActive && (
           <div className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
