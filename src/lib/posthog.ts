@@ -134,11 +134,14 @@ export function captureEvent(
   posthog.capture(event, properties);
 }
 
-export function captureException(error: unknown): void {
+export function captureException(
+  error: unknown,
+  properties?: EventProperties,
+): void {
   if (!apiKey) return;
   if (getAnalyticsConsent() !== "granted") return;
   initPostHog();
-  posthog.captureException(error);
+  posthog.captureException(error, properties);
 }
 
 export function identifyUser(
