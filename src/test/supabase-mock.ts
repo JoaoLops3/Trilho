@@ -10,8 +10,11 @@ type QueryResult = {
 type TableHandler = {
   upsert?: QueryResult | (() => QueryResult | Promise<QueryResult>);
   select?: QueryResult | (() => QueryResult | Promise<QueryResult>);
+  /** Quando true, `.select().eq()` resolve direto (sem maybeSingle). */
+  selectResolvesOnEq?: boolean;
   delete?: QueryResult | (() => QueryResult | Promise<QueryResult>);
   update?: QueryResult | (() => QueryResult | Promise<QueryResult>);
+  count?: QueryResult | (() => QueryResult | Promise<QueryResult>);
 };
 
 /** Mock enxuto do client Supabase para testes de cloud-sync. */
@@ -28,18 +31,30 @@ export function createSupabaseMock(
     const handler = tableHandlers[table] ?? {};
     let afterSelect = false;
     let afterUpdate = false;
+    let afterHeadCount = false;
 
     const chain = {
-      select: vi.fn((payload?: unknown) => {
+      select: vi.fn((payload?: unknown, opts?: { head?: boolean }) => {
         calls.push({ table, op: "select", payload });
+        if (opts?.head) {
+          afterHeadCount = true;
+          return chain;
+        }
         afterSelect = true;
         return chain;
       }),
-      eq: vi.fn(async (payload?: unknown) => {
+      eq: vi.fn((payload?: unknown) => {
         calls.push({ table, op: "eq", payload });
+        if (afterHeadCount) {
+          afterHeadCount = false;
+          return resolve(handler.count ?? { count: 0, error: null });
+        }
         if (afterSelect) {
           afterSelect = false;
-          return resolve(handler.select ?? { data: [], error: null });
+          if (handler.selectResolvesOnEq) {
+            return resolve(handler.select ?? { data: [], error: null });
+          }
+          return chain;
         }
         if (afterUpdate) {
           afterUpdate = false;

@@ -20,8 +20,9 @@
     "test:observability": "node --test scripts/validate-observability.mjs",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
-    "test": "npm run test:unit && npm run test:sync && npm run test:auth && npm run test:rls && npm run test:tokens && npm run test:observability && npm run test:vitest",
+    "test": "npm run test:unit && npm run test:sync && npm run test:auth && npm run test:rls && npm run test:tokens && npm run test:observability && npm run test:vitest && npm run test:ci",
     "test:vitest": "node --test scripts/validate-vitest.mjs",
+    "test:ci": "node --test scripts/validate-ci.mjs",
     "cap:sync": "npm run build && npx cap sync ios",
     "cap:ios": "npm run cap:sync && npx cap open ios",
     "cap:open:ios": "npx cap open ios"

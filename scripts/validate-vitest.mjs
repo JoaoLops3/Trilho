@@ -22,7 +22,10 @@ const DOMAIN_TEST_FILES = [
   "src/lib/auth-errors.test.ts",
   "src/lib/week-utils.test.ts",
   "src/lib/task-duration.test.ts",
+  "src/lib/routine-dedupe.test.ts",
+  "src/lib/notification-scheduler.test.ts",
   "src/lib/sync/mappers.test.ts",
+  "src/lib/sync/mappers-local-data.test.ts",
   "src/lib/sync/assert-no-sync-error.test.ts",
   "src/lib/sync/cloud-sync.test.ts",
 ];
@@ -75,9 +78,11 @@ describe("routine-generator — cobre dedup e limpeza", () => {
 describe("cloud-sync — mock Supabase", () => {
   const src = read("src/lib/sync/cloud-sync.test.ts");
 
-  it("testa syncTasksToCloud e pullUserSnapshot", () => {
+  it("testa sync, pull, push e hasCloudData", () => {
     assert.match(src, /syncTasksToCloud/);
     assert.match(src, /pullUserSnapshot/);
+    assert.match(src, /pushUserSnapshot/);
+    assert.match(src, /hasCloudData/);
     assert.match(src, /getSupabase/);
   });
 });
