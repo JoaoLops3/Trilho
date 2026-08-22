@@ -17,13 +17,18 @@ import { ScreenLoadingSkeleton } from "./components/ScreenLoadingSkeleton";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { TasksProvider, useTasks } from "./lib/tasks-context";
 import { RoutinesProvider, useRoutines } from "./lib/routines-context";
-import { AuthProvider, isAuthRoute, NEW_PASSWORD_PATH } from "./lib/auth-context";
+import {
+  AuthProvider,
+  isAuthRoute,
+  NEW_PASSWORD_PATH,
+} from "./lib/auth-context";
 import { AuthGate } from "./components/AuthGate";
 import { SyncProvider } from "./lib/sync-context";
 import { ProfileProvider } from "./lib/profile-context";
 import { NotificationsProvider } from "./lib/notifications-context";
 import { ToastProvider } from "./lib/toast-context";
 import { ImportLocalDataSheet } from "./components/ImportLocalDataSheet";
+import { SyncStatusIndicator } from "./components/SyncStatusIndicator";
 import { NotificationPermissionSheet } from "./components/NotificationPermissionSheet";
 import { AnalyticsConsentSheet } from "./components/AnalyticsConsentSheet";
 import { syncNativeSchedulesFromStorage } from "./lib/native-notifications";
@@ -161,7 +166,9 @@ function AppRoutes() {
               path="/stats"
               render={() => (
                 <ErrorBoundary context="stats">
-                  <Suspense fallback={<ScreenLoadingSkeleton variant="stats" />}>
+                  <Suspense
+                    fallback={<ScreenLoadingSkeleton variant="stats" />}
+                  >
                     <StatsScreen />
                   </Suspense>
                 </ErrorBoundary>
@@ -300,6 +307,7 @@ function AppRoutes() {
       {showTabBar ? <CustomTabBar /> : null}
       <GlobalTaskSheet />
       <NativeNotificationBridge />
+      <SyncStatusIndicator />
       <ImportLocalDataSheet />
       <NotificationPermissionSheet />
       <AnalyticsConsentSheet />

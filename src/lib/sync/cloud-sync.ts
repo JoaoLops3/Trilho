@@ -1,3 +1,4 @@
+import type { PostgrestError } from "@supabase/supabase-js";
 import type { Task } from "../../components/TaskCard";
 import type { DayStat } from "../day-stats";
 import {
@@ -28,6 +29,15 @@ import {
 import type { Json, ProfileRow } from "../../types/database";
 import type { RoutineTemplate } from "../../types/routine";
 import type { UserDataSnapshot } from "./mappers";
+
+function assertNoSyncError(
+  error: PostgrestError | null,
+  context: string,
+): void {
+  if (error) {
+    throw new Error(`sync ${context}: ${error.message}`);
+  }
+}
 
 function mergePreferences(
   partial?: Partial<NotificationPreferences>,
@@ -127,6 +137,15 @@ export async function pullUserSnapshot(
     supabase.from("routine_templates").select("*").eq("user_id", userId),
   ]);
 
+  // Pull com erro não pode virar snapshot vazio — applySnapshot sobrescreveria
+  // o cache local com nada.
+  assertNoSyncError(profileRes.error, "pull profiles");
+  assertNoSyncError(tasksRes.error, "pull tasks");
+  assertNoSyncError(historyRes.error, "pull day_history");
+  assertNoSyncError(prefsRes.error, "pull notification_preferences");
+  assertNoSyncError(notificationsRes.error, "pull notifications");
+  assertNoSyncError(routinesRes.error, "pull routine_templates");
+
   const profileRow = profileRes.data as ProfileRow | null;
   const localProfile = loadProfile();
 
@@ -165,10 +184,11 @@ export async function markLocalImportDone(userId: string): Promise<void> {
   const supabase = getSupabase();
   if (!supabase) return;
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update({ local_import_done: true })
     .eq("id", userId);
+  assertNoSyncError(error, "markLocalImportDone");
 }
 
 export async function pushUserSnapshot(
@@ -187,7 +207,7 @@ export async function pushUserSnapshot(
   await syncPreferencesToCloud(userId, snapshot.preferences);
   await syncRoutinesToCloud(userId, snapshot.routines);
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update(
       profileToEditableRow(
@@ -196,6 +216,7 @@ export async function pushUserSnapshot(
       ),
     )
     .eq("id", userId);
+  assertNoSyncError(error, "push profiles");
 }
 
 export async function syncTasksToCloud(
@@ -210,13 +231,15 @@ export async function syncTasksToCloud(
   const ids = new Set(pruned.map((task) => task.id));
 
   if (rows.length > 0) {
-    await supabase.from("tasks").upsert(rows);
+    const { error } = await supabase.from("tasks").upsert(rows);
+    assertNoSyncError(error, "upsert tasks");
   }
 
-  const { data: existing } = await supabase
+  const { data: existing, error: selectError } = await supabase
     .from("tasks")
     .select("id")
     .eq("user_id", userId);
+  assertNoSyncError(selectError, "select tasks");
 
   const staleIds =
     existing
@@ -224,7 +247,8 @@ export async function syncTasksToCloud(
       .map((row) => row.id as string) ?? [];
 
   if (staleIds.length > 0) {
-    await supabase.from("tasks").delete().in("id", staleIds);
+    const { error } = await supabase.from("tasks").delete().in("id", staleIds);
+    assertNoSyncError(error, "delete tasks");
   }
 }
 
@@ -239,13 +263,15 @@ export async function syncRoutinesToCloud(
   const ids = new Set(routines.map((routine) => routine.id));
 
   if (rows.length > 0) {
-    await supabase.from("routine_templates").upsert(rows);
+    const { error } = await supabase.from("routine_templates").upsert(rows);
+    assertNoSyncError(error, "upsert routine_templates");
   }
 
-  const { data: existing } = await supabase
+  const { data: existing, error: selectError } = await supabase
     .from("routine_templates")
     .select("id")
     .eq("user_id", userId);
+  assertNoSyncError(selectError, "select routine_templates");
 
   const staleIds =
     existing
@@ -253,7 +279,11 @@ export async function syncRoutinesToCloud(
       .map((row) => row.id as string) ?? [];
 
   if (staleIds.length > 0) {
-    await supabase.from("routine_templates").delete().in("id", staleIds);
+    const { error } = await supabase
+      .from("routine_templates")
+      .delete()
+      .in("id", staleIds);
+    assertNoSyncError(error, "delete routine_templates");
   }
 }
 
@@ -269,12 +299,16 @@ export async function syncHistoryToCloud(
   const rows = history.map((entry) => dayStatToRow(entry, userId));
   const dates = new Set(history.map((entry) => entry.date));
 
-  await supabase.from("day_history").upsert(rows);
+  const { error: upsertError } = await supabase
+    .from("day_history")
+    .upsert(rows);
+  assertNoSyncError(upsertError, "upsert day_history");
 
-  const { data: existing } = await supabase
+  const { data: existing, error: selectError } = await supabase
     .from("day_history")
     .select("date")
     .eq("user_id", userId);
+  assertNoSyncError(selectError, "select day_history");
 
   const staleDates =
     existing
@@ -282,11 +316,12 @@ export async function syncHistoryToCloud(
       .map((row) => row.date as string) ?? [];
 
   if (staleDates.length > 0) {
-    await supabase
+    const { error } = await supabase
       .from("day_history")
       .delete()
       .eq("user_id", userId)
       .in("date", staleDates);
+    assertNoSyncError(error, "delete day_history");
   }
 }
 
@@ -299,10 +334,11 @@ export async function syncProfileToCloud(
 
   const meta = await fetchProfileMeta(userId);
 
-  await supabase
+  const { error } = await supabase
     .from("profiles")
     .update(profileToEditableRow(profile, meta?.local_import_done ?? false))
     .eq("id", userId);
+  assertNoSyncError(error, "push profile");
 }
 
 export async function syncPreferencesToCloud(
@@ -312,13 +348,14 @@ export async function syncPreferencesToCloud(
   const supabase = getSupabase();
   if (!supabase) return;
 
-  await supabase.from("notification_preferences").upsert(
+  const { error } = await supabase.from("notification_preferences").upsert(
     {
       user_id: userId,
       prefs: preferences as unknown as Json,
     },
     { onConflict: "user_id" },
   );
+  assertNoSyncError(error, "upsert notification_preferences");
 }
 
 export async function syncNotificationsToCloud(
@@ -328,8 +365,6 @@ export async function syncNotificationsToCloud(
   const supabase = getSupabase();
   if (!supabase) return;
 
-  // Identidade estável no DB é (user_id, dedup_key) — o id local inclui
-  // timestamp e muda entre devices. Upsert pela PK causava 409 Conflict.
   const byDedup = new Map<string, AppNotification>();
   for (const notification of notifications) {
     byDedup.set(notification.dedupKey, notification);
@@ -339,15 +374,17 @@ export async function syncNotificationsToCloud(
   const dedupKeys = new Set(unique.map((n) => n.dedupKey));
 
   if (rows.length > 0) {
-    await supabase.from("notifications").upsert(rows, {
+    const { error } = await supabase.from("notifications").upsert(rows, {
       onConflict: "user_id,dedup_key",
     });
+    assertNoSyncError(error, "upsert notifications");
   }
 
-  const { data: existing } = await supabase
+  const { data: existing, error: selectError } = await supabase
     .from("notifications")
     .select("id, dedup_key")
     .eq("user_id", userId);
+  assertNoSyncError(selectError, "select notifications");
 
   const staleIds =
     existing
@@ -355,6 +392,10 @@ export async function syncNotificationsToCloud(
       .map((row) => row.id as string) ?? [];
 
   if (staleIds.length > 0) {
-    await supabase.from("notifications").delete().in("id", staleIds);
+    const { error } = await supabase
+      .from("notifications")
+      .delete()
+      .in("id", staleIds);
+    assertNoSyncError(error, "delete notifications");
   }
 }
