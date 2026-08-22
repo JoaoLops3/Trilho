@@ -1,5 +1,5 @@
 import { Component, ReactNode } from "react";
-import { captureException } from "../lib/posthog";
+import { reportError } from "../lib/observability";
 import { ErrorFallback } from "./ErrorFallback";
 
 interface ErrorBoundaryProps {
@@ -29,14 +29,14 @@ interface ErrorBoundaryState {
 
 /**
  * ErrorBoundary - Captura erros React em qualquer lugar da árvore de componentes.
- * 
+ *
  * Uso:
  * ```tsx
  * <ErrorBoundary context="dashboard">
  *   <DashboardScreen />
  * </ErrorBoundary>
  * ```
- * 
+ *
  * Com fallback customizado:
  * ```tsx
  * <ErrorBoundary fallback={<MinhaTelaDeErro />}>
@@ -64,17 +64,10 @@ export class ErrorBoundary extends Component<
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     const { context, onError } = this.props;
 
-    // Log do erro com contexto adicional
-    console.error(
-      `[ErrorBoundary${context ? ` - ${context}` : ""}]:`,
-      error,
-      errorInfo
-    );
-
-    // Envia para PostHog (analytics)
-    captureException(error, {
+    reportError(error, {
+      surface: "error_boundary",
       errorBoundaryContext: context,
-      componentStack: errorInfo.componentStack,
+      componentStack: errorInfo.componentStack ?? undefined,
     });
 
     // Callback customizado do consumidor

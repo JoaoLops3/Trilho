@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { captureException } from "../lib/posthog";
+import { reportError } from "../lib/observability";
 
 interface UseAsyncActionOptions {
   /**
@@ -14,6 +14,8 @@ interface UseAsyncActionOptions {
    * Se true, captura exceções e envia para PostHog automaticamente
    */
   captureErrors?: boolean;
+  /** Identificador da operação para observabilidade (ex: "save_profile"). */
+  operation?: string;
 }
 
 /**
@@ -38,7 +40,7 @@ interface UseAsyncActionOptions {
  * ```
  */
 export function useAsyncAction(options: UseAsyncActionOptions = {}) {
-  const { onSuccess, onError, captureErrors = true } = options;
+  const { onSuccess, onError, captureErrors = true, operation } = options;
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
 
@@ -61,7 +63,10 @@ export function useAsyncAction(options: UseAsyncActionOptions = {}) {
           setError(error);
           
           if (captureErrors) {
-            captureException(error);
+            reportError(error, {
+              surface: "async_action",
+              operation,
+            });
           }
           
           onError?.(error);
@@ -71,7 +76,7 @@ export function useAsyncAction(options: UseAsyncActionOptions = {}) {
         }
       };
     },
-    [onSuccess, onError, captureErrors],
+    [onSuccess, onError, captureErrors, operation],
   );
 
   return {

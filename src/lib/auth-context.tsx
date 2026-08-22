@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
-import { mapAuthError } from "./auth-errors";
+import { mapAuthErrorWithTelemetry } from "./auth-errors";
 import { getAuthRedirectPath } from "./app-url";
 import {
   clearAuthParamsFromUrl,
@@ -181,7 +181,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         password,
       });
 
-      return { error: mapAuthError(error) };
+      return { error: mapAuthErrorWithTelemetry(error, "sign_in") };
     },
     [],
   );
@@ -212,7 +212,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       });
 
       if (error) {
-        return { error: mapAuthError(error), needsEmailConfirmation: false };
+        return {
+          error: mapAuthErrorWithTelemetry(error, "sign_up"),
+          needsEmailConfirmation: false,
+        };
       }
 
       const needsEmailConfirmation = !data.session && Boolean(data.user);
@@ -287,7 +290,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         },
       );
 
-      return { error: mapAuthError(error) };
+      return { error: mapAuthErrorWithTelemetry(error, "reset_password") };
     },
     [],
   );
@@ -301,7 +304,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       const { error } = await supabase.auth.updateUser({ password });
       if (error) {
-        return { error: mapAuthError(error) };
+        return { error: mapAuthErrorWithTelemetry(error, "update_password") };
       }
 
       clearPasswordRecoveryPending();

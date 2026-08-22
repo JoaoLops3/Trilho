@@ -1,5 +1,6 @@
 import posthog from "posthog-js";
 import { Capacitor } from "@capacitor/core";
+import { getRuntimeContext } from "./runtime-context";
 import { STORAGE_KEYS } from "./storage-keys";
 
 const apiKey = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
@@ -87,6 +88,8 @@ export function initPostHog(): void {
   if (posthog.has_opted_out_capturing()) {
     posthog.opt_in_capturing();
   }
+
+  posthog.register(getRuntimeContext());
 
   for (const { event, properties } of pendingEvents) {
     posthog.capture(event, properties);
