@@ -10,7 +10,7 @@ import {
 } from "react";
 import { App as CapApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
-import type { Task } from "../components/TaskCard";
+import type { Task } from "../types/task";
 import type { DayStat } from "./day-stats";
 import { saveHistory } from "./day-stats";
 import type { NotificationPreferences } from "./notification-preferences";

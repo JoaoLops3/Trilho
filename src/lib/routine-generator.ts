@@ -1,4 +1,4 @@
-import type { Task } from "../components/TaskCard";
+import type { Task } from "../types/task";
 import type { RoutineTemplate } from "../types/routine";
 import { dayKey } from "./day-stats";
 

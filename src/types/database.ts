@@ -1,3 +1,5 @@
+import type { TaskPriority, TaskStatus } from "./task";
+
 export type Json =
   | string
   | number
@@ -6,8 +8,8 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
-export type TaskStatus = "active" | "pending" | "paused" | "completed";
-export type TaskPriority = "low" | "medium" | "high";
+export type { TaskPriority, TaskStatus };
+
 export type NotificationType =
   | "task_upcoming"
   | "task_completed"

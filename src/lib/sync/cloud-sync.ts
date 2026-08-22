@@ -1,4 +1,4 @@
-import type { Task } from "../../components/TaskCard";
+import type { Task } from "../../types/task";
 import type { DayStat } from "../day-stats";
 import {
   DEFAULT_PREFERENCES,

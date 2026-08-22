@@ -1,4 +1,4 @@
-import type { Task } from "../components/TaskCard";
+import type { Task } from "../types/task";
 
 /** Propriedades de analytics para tarefas — sem PII (sem título). */
 export function taskAnalyticsProps(

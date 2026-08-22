@@ -1,4 +1,4 @@
-import type { Task } from "../components/TaskCard";
+import type { Task } from "../types/task";
 
 import { dayKey } from "./day-stats";
 import { STORAGE_KEYS } from "./storage-keys";

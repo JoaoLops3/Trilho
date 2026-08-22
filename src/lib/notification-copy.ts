@@ -1,4 +1,4 @@
-import type { Task } from "../components/TaskCard";
+import type { Task } from "../types/task";
 import type { NotificationType } from "../types/notification";
 import type { NewNotification } from "./notification-storage";
 import { dayKey } from "./day-stats";

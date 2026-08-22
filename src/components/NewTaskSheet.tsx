@@ -15,7 +15,7 @@ import {
   getWeekDays,
   weekdayShortLabel,
 } from "../lib/week-utils";
-import type { Task, TaskPriority } from "./TaskCard";
+import type { Task, TaskPriority } from "../types/task";
 import type { RoutineTemplate, RoutineTemplateInput } from "../types/routine";
 
 interface NewTaskSheetProps {

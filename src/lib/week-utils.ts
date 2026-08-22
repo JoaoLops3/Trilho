@@ -1,4 +1,4 @@
-import type { Task } from "../components/TaskCard";
+import type { Task } from "../types/task";
 import { dayKey } from "./day-stats";
 
 /** Labels curtos indexados por `Date.getDay()`: 0=dom … 6=sáb. */
