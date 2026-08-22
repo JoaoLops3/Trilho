@@ -142,7 +142,7 @@ supabase gen types typescript --project-id qellobflykthabmauicb > src/types/data
 
 ## Segurança
 
-- RLS **ENABLED** em todas as 6 tabelas; policies `TO authenticated` com `(select auth.uid())` (initplan — migration `20260822120000_rls_initplan.sql`).
+- RLS **ENABLED** em todas as 6 tabelas; policies `TO authenticated` com `(select auth.uid())` (initplan — migration `20260822142153_rls_initplan.sql`).
 - Advisor Supabase: **0 avisos** (pós-hardening).
 - Checklist: [`docs/security-supabase-checklist.md`](./security-supabase-checklist.md)
 - Auditoria Fase 11: [`docs/security-audit-fase-11-complete.md`](./security-audit-fase-11-complete.md)

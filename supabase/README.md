@@ -20,4 +20,4 @@ Timestamps alinhados ao histórico do projeto remoto (`schema_migrations`).
 4. `20260627183639_delete_own_account.sql` — exclusão de conta (LGPD)
 5. `20260627203026_signup_display_name.sql` — `display_name` no signup
 6. `20260628022742_profile_nickname.sql` — coluna `nickname` editável no app
-7. `20260822120000_rls_initplan.sql` — RLS initplan: `(select auth.uid())` nas 24 policies
+7. `20260822142153_rls_initplan.sql` — RLS initplan: `(select auth.uid())` nas 24 policies (version alinhada ao remoto via MCP)

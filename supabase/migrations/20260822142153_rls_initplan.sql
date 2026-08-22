@@ -1,6 +1,7 @@
 -- RLS initplan: (select auth.uid()) avaliado uma vez por query, não por linha.
 -- Resolve WARN x24 do advisor Supabase (auth_rls_initplan).
 -- Sem mudança de semântica — mesma ownership por linha.
+-- Version 20260822142153 = timestamp gerado pelo apply_migration (MCP); manter igual ao remoto.
 
 -- profiles (ownership via id)
 drop policy if exists profiles_select_own on public.profiles;

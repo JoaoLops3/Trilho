@@ -10,7 +10,7 @@ import { describe, it } from "node:test";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
 const migrationPath =
-  "supabase/migrations/20260822120000_rls_initplan.sql";
+  "supabase/migrations/20260822142153_rls_initplan.sql";
 
 function read(rel) {
   return readFileSync(join(root, rel), "utf8");
@@ -19,7 +19,7 @@ function read(rel) {
 describe("rls initplan migration", () => {
   const sql = read(migrationPath);
 
-  it("existe migration 20260822120000_rls_initplan.sql", () => {
+  it("existe migration 20260822142153_rls_initplan.sql", () => {
     assert.ok(sql.length > 0);
   });
 
