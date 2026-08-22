@@ -1,16 +1,20 @@
 import type { RoutineTemplate } from "../types/routine";
 
+import { routineTemplateSchema } from "./storage-schemas";
+import { parseStorageArray } from "./storage-runtime";
 import { STORAGE_KEYS } from "./storage-keys";
 
 const ROUTINES_KEY = STORAGE_KEYS.routines;
 
 export function loadRoutines(): RoutineTemplate[] {
   try {
-    const raw = localStorage.getItem(ROUTINES_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed as RoutineTemplate[];
+    return (
+      parseStorageArray(
+        localStorage.getItem(ROUTINES_KEY),
+        routineTemplateSchema,
+        { storageKey: ROUTINES_KEY, operation: "load_routines" },
+      ) ?? []
+    );
   } catch {
     return [];
   }

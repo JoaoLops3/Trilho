@@ -1,5 +1,7 @@
 import type { Task } from "../types/task";
 
+import { dayStatSchema } from "./storage-schemas";
+import { parseStorageArray } from "./storage-runtime";
 import { STORAGE_KEYS } from "./storage-keys";
 
 const HISTORY_KEY = STORAGE_KEYS.history;
@@ -33,11 +35,12 @@ export function dayKey(date: Date = new Date()): string {
 
 export function loadHistory(): DayStat[] {
   try {
-    const raw = localStorage.getItem(HISTORY_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed as DayStat[];
+    return (
+      parseStorageArray(localStorage.getItem(HISTORY_KEY), dayStatSchema, {
+        storageKey: HISTORY_KEY,
+        operation: "load_history",
+      }) ?? []
+    );
   } catch {
     return [];
   }

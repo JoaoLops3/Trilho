@@ -1,4 +1,9 @@
 import type { NotificationType } from "../types/notification";
+import {
+  leadMinutesSchema,
+  notificationPreferencesSchema,
+} from "./storage-schemas";
+import { parseStorageJson } from "./storage-runtime";
 import { STORAGE_KEYS } from "./storage-keys";
 
 export type LeadMinutes = 5 | 10 | 15;
@@ -62,28 +67,36 @@ export const DEFAULT_PREFERENCES: NotificationPreferences = {
   },
 };
 
-function isLeadMinutes(value: unknown): value is LeadMinutes {
-  return value === 5 || value === 10 || value === 15;
+function mergePreferences(
+  partial: Partial<NotificationPreferences>,
+): NotificationPreferences {
+  const leadResult = leadMinutesSchema.safeParse(partial.leadMinutes);
+  return {
+    leadMinutes: leadResult.success
+      ? leadResult.data
+      : DEFAULT_PREFERENCES.leadMinutes,
+    hideTaskContent:
+      typeof partial.hideTaskContent === "boolean"
+        ? partial.hideTaskContent
+        : DEFAULT_PREFERENCES.hideTaskContent,
+    enabled: {
+      ...DEFAULT_PREFERENCES.enabled,
+      ...(partial.enabled ?? {}),
+    },
+  };
 }
 
 export function loadPreferences(): NotificationPreferences {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_PREFERENCES;
-    const parsed = JSON.parse(raw) as Partial<NotificationPreferences>;
-    return {
-      leadMinutes: isLeadMinutes(parsed.leadMinutes)
-        ? parsed.leadMinutes
-        : DEFAULT_PREFERENCES.leadMinutes,
-      hideTaskContent:
-        typeof parsed.hideTaskContent === "boolean"
-          ? parsed.hideTaskContent
-          : DEFAULT_PREFERENCES.hideTaskContent,
-      enabled: {
-        ...DEFAULT_PREFERENCES.enabled,
-        ...(parsed.enabled ?? {}),
-      },
-    };
+    const parsed = parseStorageJson(localStorage.getItem(STORAGE_KEY));
+    if (parsed === null) return DEFAULT_PREFERENCES;
+    if (parsed === undefined || typeof parsed !== "object" || parsed === null) {
+      return DEFAULT_PREFERENCES;
+    }
+
+    const merged = mergePreferences(parsed as Partial<NotificationPreferences>);
+    const validated = notificationPreferencesSchema.safeParse(merged);
+    return validated.success ? validated.data : DEFAULT_PREFERENCES;
   } catch {
     return DEFAULT_PREFERENCES;
   }

@@ -1,5 +1,7 @@
 import type { AppNotification } from "../types/notification";
 
+import { appNotificationSchema } from "./storage-schemas";
+import { parseStorageArray } from "./storage-runtime";
 import { STORAGE_KEYS } from "./storage-keys";
 
 const STORAGE_KEY = STORAGE_KEYS.notifications;
@@ -7,11 +9,13 @@ const MAX_ITEMS = 50;
 
 export function loadNotifications(): AppNotification[] {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return [];
-    return parsed as AppNotification[];
+    return (
+      parseStorageArray(
+        localStorage.getItem(STORAGE_KEY),
+        appNotificationSchema,
+        { storageKey: STORAGE_KEY, operation: "load_notifications" },
+      ) ?? []
+    );
   } catch {
     return [];
   }
