@@ -2,6 +2,10 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { PostHogProvider } from "@posthog/react";
 import App from "./App";
+import {
+  validateClientEnvAtBoot,
+  warnPrivilegedViteEnv,
+} from "./lib/env";
 import { posthog, captureEvent } from "./lib/posthog";
 import { migrateLegacyStorageKeys } from "./lib/storage-keys";
 
@@ -11,6 +15,8 @@ import "./index.css";
 // Ionic theme overrides
 import "./theme/variables.css";
 
+validateClientEnvAtBoot();
+warnPrivilegedViteEnv();
 migrateLegacyStorageKeys();
 
 createRoot(document.getElementById("root")!).render(

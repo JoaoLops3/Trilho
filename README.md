@@ -167,6 +167,8 @@ Para iOS: após `npm run cap:ios`, selecione um simulador ou dispositivo no Xcod
 
 **Importante:** nunca coloque `SUPABASE_SERVICE_ROLE_KEY`, JWT secret ou senha de banco em variáveis com prefixo `VITE_` — elas entram no bundle do cliente. Chaves privilegiadas ficam em Edge Functions / CI.
 
+**Validação no boot:** `src/lib/env.ts` valida todas as variáveis `VITE_*` com Zod na inicialização. `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` devem estar **ambas** definidas ou **ambas** ausentes — se só uma estiver presente, o app loga o erro em dev e opera em **modo offline-only** (sem sync/conta), sem crash. PostHog e `VITE_APP_URL` são opcionais.
+
 ## Roadmap
 
 Desenvolvimento por fases em [`.cursor/plans/ROADMAP.md`](.cursor/plans/ROADMAP.md). Status resumido:

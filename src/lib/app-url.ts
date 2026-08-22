@@ -2,10 +2,11 @@
  * URL base do app para redirects de auth (Supabase email / recovery).
  * Em produção, defina VITE_APP_URL no .env (ex. https://app.seudominio.com).
  */
+import { clientEnv } from "./env";
+
 export function getAppOrigin(): string {
-  const configured = import.meta.env.VITE_APP_URL as string | undefined;
-  if (configured?.trim()) {
-    return configured.trim().replace(/\/$/, "");
+  if (clientEnv.appUrl) {
+    return clientEnv.appUrl;
   }
   if (typeof window !== "undefined") {
     return window.location.origin;
