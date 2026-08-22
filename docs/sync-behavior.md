@@ -29,8 +29,10 @@ O app **sempre** grava local primeiro (cache offline). Quando autenticado, envia
 - `cloud-sync.ts` propaga erros do supabase-js (`assertNoSyncError`) — antes, um upsert falho passava por sucesso e o diff+delete podia apagar linhas na nuvem.
 - Pull com erro lança exceção em vez de virar snapshot vazio (que apagaria o cache local no `applySnapshot`).
 - Push/pull falho mostra toast de erro com ação **Tentar novamente** (reexecuta o refresh). Um toast por falha; reseta em qualquer sync bem-sucedido. Erros também vão para o PostHog (`captureException`).
-- `SyncStatusIndicator` montado no app (junto do `ImportLocalDataSheet`): mostra "Sincronizando" durante sync ativo e "Offline" sem rede com sessão ativa.
+- `SyncStatusIndicator` montado no app (junto do `ImportLocalDataSheet`): mostra "Sincronizando" durante sync ativo.
+- Offline autenticado: `OfflineNetworkBanner` monta `NetworkErrorState` com **Tentar novamente** (`refreshFromCloud`).
 - Validação automatizada sem Vitest: `npm run test:sync` (checa ordem push→pull, asserts de erro, indicator montado e docs).
+- Feedback UI wiring: `npm run test:feedback-ui` (NetworkErrorState, useAsyncAction, toasts, focus trap).
 
 ### Histórico diário (`day_history`)
 

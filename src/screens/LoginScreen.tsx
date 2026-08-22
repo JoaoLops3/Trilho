@@ -6,7 +6,9 @@ import { OrbBackground } from "../components/OrbBackground";
 import { AppLogo } from "../components/AppLogo";
 import { AuthFormField } from "../components/AuthFormField";
 import { ButtonWithLoading } from "../components/ButtonWithLoading";
+import { GenericErrorState } from "../components/GenericErrorState";
 import { useAuth } from "../lib/auth-context";
+import { useAsyncAction } from "../hooks/useAsyncAction";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
 import { APP_NAME, APP_TAGLINE, APP_VERSION } from "../lib/app-brand";
 import {
@@ -80,7 +82,18 @@ export function LoginScreen() {
   }>({});
   const [formError, setFormError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const {
+    isLoading: isSubmitting,
+    execute: executeAuth,
+    reset: resetAsyncError,
+  } = useAsyncAction({
+    // Erros de auth já viram copy amigável na UI — sem PostHog em falha esperada.
+    captureErrors: false,
+    operation: "auth_login_signup",
+    onError: (err) => {
+      setFormError(err.message);
+    },
+  });
 
   useEffect(() => {
     if (queryMode === "cadastro") setMode("signup");
@@ -92,6 +105,7 @@ export function LoginScreen() {
     setSuccessMessage(null);
     setFieldErrors({});
     setDisplayName("");
+    resetAsyncError();
     history.replace(next === "signup" ? "/login?mode=cadastro" : "/login");
   };
 
@@ -99,6 +113,7 @@ export function LoginScreen() {
     event.preventDefault();
     setFormError(null);
     setSuccessMessage(null);
+    resetAsyncError();
 
     const emailError = validateEmail(email);
     const displayNameError =
@@ -118,13 +133,11 @@ export function LoginScreen() {
 
     if (emailError || displayNameError || passwordError) return;
 
-    setIsSubmitting(true);
-    try {
+    const run = executeAuth(async () => {
       if (mode === "login") {
         const { error } = await signIn(email, password);
         if (error) {
-          setFormError(error);
-          return;
+          throw new Error(error);
         }
         history.replace("/");
         return;
@@ -136,8 +149,7 @@ export function LoginScreen() {
         displayName,
       );
       if (error) {
-        setFormError(error);
-        return;
+        throw new Error(error);
       }
 
       if (needsEmailConfirmation) {
@@ -148,9 +160,9 @@ export function LoginScreen() {
       }
 
       history.replace("/");
-    } finally {
-      setIsSubmitting(false);
-    }
+    });
+
+    await run();
   };
 
   const submitLabel = mode === "login" ? "Entrar" : "Criar conta";
@@ -310,9 +322,7 @@ export function LoginScreen() {
                   </AnimatePresence>
 
                   {formError ? (
-                    <p className="text-sm text-coral-400" role="alert">
-                      {formError}
-                    </p>
+                    <GenericErrorState compact title={formError} />
                   ) : null}
 
                   {successMessage ? (

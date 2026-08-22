@@ -1,5 +1,7 @@
+import { useRef } from "react";
 import { createPortal } from "react-dom";
 import { AnimatePresence, motion } from "../lib/motion";
+import { useFocusTrap } from "../lib/a11y-focus";
 
 interface ConfirmDeleteAccountSheetProps {
   isOpen: boolean;
@@ -16,6 +18,9 @@ export function ConfirmDeleteAccountSheet({
   onClose,
   onConfirm,
 }: ConfirmDeleteAccountSheetProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(panelRef, isOpen);
+
   return createPortal(
     <AnimatePresence>
       {isOpen && (
@@ -30,13 +35,20 @@ export function ConfirmDeleteAccountSheet({
             onClick={isDeleting ? undefined : onClose}
           />
           <motion.div
-            className="relative z-10 w-full max-w-xl rounded-t-[28px] border border-coral-500/20 bg-[#14141c] px-5 pt-6 pb-[max(env(safe-area-inset-bottom),1.25rem)]"
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="confirm-delete-account-title"
+            className="relative z-10 w-full max-w-xl rounded-t-[28px] border border-coral-500/20 bg-surface-secondary px-5 pt-6 pb-[max(env(safe-area-inset-bottom),1.25rem)]"
             initial={{ y: "100%" }}
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", stiffness: 420, damping: 36 }}
           >
-            <h2 className="font-display text-xl font-semibold text-white">
+            <h2
+              id="confirm-delete-account-title"
+              className="font-display text-xl font-semibold text-white"
+            >
               Excluir conta?
             </h2>
             <p className="mt-2 text-sm text-obsidian-400 leading-relaxed">

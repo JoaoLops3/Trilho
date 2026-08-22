@@ -33,6 +33,7 @@ const DOMAIN_TEST_FILES = [
   "src/lib/auth-validation.test.ts",
   "src/lib/auth-deeplink.test.ts",
   "src/lib/tasks-domain-helpers.test.ts",
+  "src/hooks/useAsyncAction.test.ts",
 ];
 
 describe("vitest — bootstrap", () => {

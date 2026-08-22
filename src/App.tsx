@@ -29,6 +29,7 @@ import { NotificationsProvider } from "./lib/notifications-context";
 import { ToastProvider } from "./lib/toast-context";
 import { ImportLocalDataSheet } from "./components/ImportLocalDataSheet";
 import { SyncStatusIndicator } from "./components/SyncStatusIndicator";
+import { OfflineNetworkBanner } from "./components/OfflineNetworkBanner";
 import { NotificationPermissionSheet } from "./components/NotificationPermissionSheet";
 import { AnalyticsConsentSheet } from "./components/AnalyticsConsentSheet";
 import { syncNativeSchedulesFromStorage } from "./lib/native-notifications";
@@ -308,6 +309,7 @@ function AppRoutes() {
       <GlobalTaskSheet />
       <NativeNotificationBridge />
       <SyncStatusIndicator />
+      <OfflineNetworkBanner />
       <ImportLocalDataSheet />
       <NotificationPermissionSheet />
       <AnalyticsConsentSheet />

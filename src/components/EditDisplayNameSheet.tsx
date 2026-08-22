@@ -5,6 +5,8 @@ import { AnimatePresence, motion } from "../lib/motion";
 import { useProfile } from "../lib/profile-context";
 import { useUpdateNickname } from "../hooks/useUpdateNickname";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
+import { useToast } from "../lib/toast-context";
+import { useFocusTrap } from "../lib/a11y-focus";
 import {
   getShownName,
   PROFILE_HEADER_NAME_MAX_LENGTH,
@@ -25,11 +27,15 @@ export function EditDisplayNameSheet({
   const { profile } = useProfile();
   const { updateNickname, resetNickname, isSaving, error } =
     useUpdateNickname();
+  const toast = useToast();
   const keyboardInset = useKeyboardInset(isOpen);
+  const panelRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const [nickname, setNickname] = useState("");
   const [initialValue, setInitialValue] = useState("");
   const [fieldError, setFieldError] = useState<string | null>(null);
+
+  useFocusTrap(panelRef, isOpen);
 
   const isDirty = nickname !== initialValue;
   const accountNameDisplay = profile.accountName
@@ -63,6 +69,7 @@ export function EditDisplayNameSheet({
 
     try {
       await updateNickname(nickname);
+      toast.success("Nome atualizado");
       onClose();
     } catch (err) {
       setFieldError(
@@ -75,6 +82,7 @@ export function EditDisplayNameSheet({
     setFieldError(null);
     try {
       await resetNickname();
+      toast.success("Nome restaurado");
       onClose();
     } catch (err) {
       setFieldError(
@@ -107,6 +115,10 @@ export function EditDisplayNameSheet({
           />
 
           <motion.div
+            ref={panelRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Editar nome"
             className="relative w-full max-w-lg card-glass rounded-t-3xl rounded-b-none px-7 py-5 pb-8 max-h-[min(85dvh,100%)] overflow-y-auto"
             style={{
               marginBottom: Math.max(0, keyboardInset - 8),
