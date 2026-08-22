@@ -12,6 +12,15 @@ Regras obrigatórias antes de merge na `main` e antes de releases com dados na n
 | `.env` fora do git | `.env` e `.env.*` no `.gitignore`; usar `.env.example` como template |
 | PostHog no client | `VITE_POSTHOG_KEY` é aceitável — chave de projeto para analytics no browser |
 | CI anti-secreto | Workflow `.github/workflows/secret-scan.yml` (gitleaks) no push/PR |
+| Supply chain (prod) | CI roda `npm audit --production --audit-level=high` — falha em HIGH/CRITICAL nas deps que entram no bundle |
+
+## Exceções de audit (devDependencies)
+
+Audit completo (`npm audit`) pode reportar HIGH em ferramentas de build (Vite, ESLint, Capacitor CLI) que **não** entram no app Capacitor. Revisar trimestralmente com `npm audit fix` quando patches estiverem disponíveis.
+
+| ID / pacote | Severidade | Motivo | Revisão |
+|-------------|------------|--------|---------|
+| `dompurify` (transitivo PostHog) | moderate | Sanitizer do PostHog; app não usa DOMPurify diretamente; sem XSS surface no Trilho | 2026-08-22 |
 
 ## Row Level Security (RLS)
 
@@ -64,7 +73,7 @@ Regras obrigatórias antes de merge na `main` e antes de releases com dados na n
 | `profiles.daily_goal_minutes` | 15–720 | presets em `daily-goal.ts` |
 | `tasks.title` | 1–120 chars | `NewTaskSheet` |
 | `tasks.category` | enum fixo | categorias do app |
-| Senha (Auth) | `minimum_password_length = 6` | `validatePassword()` |
+| Senha (Auth) | `minimum_password_length = 6` | `validateSignupPassword()` — **8+** no client (cadastro/recovery) |
 
 Migration: `supabase/migrations/20260715140000_harden_input_checks.sql`
 
@@ -121,6 +130,8 @@ Rodar após cada PR que altera `supabase/migrations/`, `src/lib/supabase.ts` ou 
 
 - Prompt: `.cursor/plans/auditoria_supabase_gate.prompt.md`
 - Relatório: `docs/security-audit-fase-11-complete.md`
+- Threat model: [`docs/threat-model-seguranca.md`](./threat-model-seguranca.md)
+- Plano nota 10: [`docs/plano-seguranca.md`](./plano-seguranca.md)
 - Bloqueio: zero achados **CRITICAL** / **HIGH** em aberto
 
 ## Referências

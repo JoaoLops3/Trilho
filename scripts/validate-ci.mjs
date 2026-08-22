@@ -33,6 +33,10 @@ describe("CI — GitHub Actions", () => {
     assert.match(workflow, /npm run build/);
   });
 
+  it("executa npm audit de dependências de produção (HIGH+)", () => {
+    assert.match(workflow, /npm audit --production --audit-level=high/);
+  });
+
   it("usa Node 24 alinhado ao engines", () => {
     assert.match(workflow, /node-version: "24"/);
     assert.match(read("package.json"), /"node": "24.x"/);
