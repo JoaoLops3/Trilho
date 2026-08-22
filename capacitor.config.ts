@@ -8,6 +8,14 @@ const config: CapacitorConfig = {
   server: {
     androidScheme: "https",
     iosScheme: "https",
+    // Domínios permitidos fora do bundle — evita WebView arbitrário em links.
+    allowNavigation: [
+      "*.supabase.co",
+      "us.i.posthog.com",
+      "eu.i.posthog.com",
+      "app.posthog.com",
+      "api.dicebear.com",
+    ],
   },
   ios: {
     contentInset: "never",

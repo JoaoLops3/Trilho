@@ -73,7 +73,7 @@ Audit completo (`npm audit`) pode reportar HIGH em ferramentas de build (Vite, E
 | `profiles.daily_goal_minutes` | 15–720 | presets em `daily-goal.ts` |
 | `tasks.title` | 1–120 chars | `NewTaskSheet` |
 | `tasks.category` | enum fixo | categorias do app |
-| Senha (Auth) | `minimum_password_length = 6` | `validatePassword()` |
+| Senha (Auth) | `minimum_password_length = 6` | `validateSignupPassword()` — **8+** no client (cadastro/recovery) |
 
 Migration: `supabase/migrations/20260715140000_harden_input_checks.sql`
 

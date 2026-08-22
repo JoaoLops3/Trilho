@@ -101,6 +101,16 @@ Documento de regressão para segurança **nota 10** — o que protegemos, de que
 4. JWT nativo volta para localStorage sem Keychain → guardrail manual + checklist
 5. CI verde sem `npm audit` prod → `test:ci` falha
 
+## WebView — allowlist de navegação
+
+`capacitor.config.ts` → `server.allowNavigation` restringe domínios externos no WebView nativo:
+
+- `*.supabase.co` — Auth/API
+- PostHog (`us.i.posthog.com`, `eu.i.posthog.com`, `app.posthog.com`)
+- `api.dicebear.com` — avatares
+
+Links fora da lista não abrem navegação in-app silenciosa; preferir `Browser.open` com confirmação quando adicionar links externos na UI.
+
 ---
 
 ## Referências
