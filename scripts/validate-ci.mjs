@@ -33,8 +33,8 @@ describe("CI — GitHub Actions", () => {
     assert.match(workflow, /npm run build/);
   });
 
-  it("usa Node 20 alinhado ao engines", () => {
-    assert.match(workflow, /node-version: "20"/);
-    assert.match(read("package.json"), /"node": "20.x"/);
+  it("usa Node 24 alinhado ao engines", () => {
+    assert.match(workflow, /node-version: "24"/);
+    assert.match(read("package.json"), /"node": "24.x"/);
   });
 });

@@ -3,7 +3,8 @@ import { describe, expect, it } from "vitest";
 import { parseRawClientEnv } from "./env";
 
 const VALID_SUPABASE_URL = "https://qellobflykthabmauicb.supabase.co";
-const VALID_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.test";
+/** Placeholder de teste — formato deliberadamente não-JWT para não acionar gitleaks. */
+const VALID_ANON_KEY = "test-anon-key-unit-tests-only";
 
 describe("parseRawClientEnv", () => {
   it("aceita env Supabase + PostHog válidos", () => {
@@ -46,9 +47,9 @@ describe("parseRawClientEnv", () => {
     });
     expect(result.success).toBe(false);
     if (result.success) return;
-    expect(result.issues.some((i) => i.includes("VITE_SUPABASE_ANON_KEY"))).toBe(
-      true,
-    );
+    expect(
+      result.issues.some((i) => i.includes("VITE_SUPABASE_ANON_KEY")),
+    ).toBe(true);
   });
 
   it("rejeita par Supabase incompleto (só key)", () => {
