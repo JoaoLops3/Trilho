@@ -24,9 +24,13 @@ export function getRequiredAuthRedirectUrls(): string[] {
     `${origin}/login`,
     `${origin}/cadastro`,
     `${origin}/recuperar-senha`,
+    `${origin}/nova-senha`,
     "http://localhost:5173/login",
     "http://127.0.0.1:5173/login",
+    "http://localhost:5173/nova-senha",
     "capacitor://localhost/login",
+    "capacitor://localhost/nova-senha",
     "https://localhost/login",
+    "https://localhost/nova-senha",
   ];
 }

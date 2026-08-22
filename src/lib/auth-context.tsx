@@ -10,10 +10,19 @@ import {
 import type { Session, User } from "@supabase/supabase-js";
 import { mapAuthError } from "./auth-errors";
 import { getAuthRedirectPath } from "./app-url";
+import {
+  clearAuthParamsFromUrl,
+  clearPasswordRecoveryPending,
+  markPasswordRecoveryPending,
+  readPasswordRecoveryPending,
+} from "./auth-deeplink";
 import { loadProfile, saveProfile } from "./profile-storage";
 import { clearAllLocalAppData } from "./user-data-export";
 import { captureEvent, identifyUser, resetAnalyticsUser } from "./posthog";
 import { getSupabase, isSupabaseConfigured } from "./supabase";
+
+/** Rota da tela de definir nova senha após o link de recovery (iOS + web). */
+export const NEW_PASSWORD_PATH = "/nova-senha";
 
 interface AuthResult {
   error: string | null;
@@ -26,6 +35,8 @@ interface AuthContextValue {
   isLoading: boolean;
   isAuthenticated: boolean;
   authConfigured: boolean;
+  /** Sessão veio do link de recuperação — deve concluir em /nova-senha. */
+  passwordRecoveryPending: boolean;
   signIn: (email: string, password: string) => Promise<AuthResult>;
   signUp: (
     email: string,
@@ -35,6 +46,8 @@ interface AuthContextValue {
   signOut: () => Promise<void>;
   deleteAccount: () => Promise<AuthResult>;
   resetPassword: (email: string) => Promise<AuthResult>;
+  updatePassword: (password: string) => Promise<AuthResult>;
+  clearPasswordRecovery: () => void;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -95,6 +108,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(isSupabaseConfigured());
+  const [passwordRecoveryPending, setPasswordRecoveryPending] = useState(
+    () => readPasswordRecoveryPending(),
+  );
+
+  const clearPasswordRecovery = useCallback(() => {
+    clearPasswordRecoveryPending();
+    setPasswordRecoveryPending(false);
+  }, []);
 
   useEffect(() => {
     const supabase = getSupabase();
@@ -122,6 +143,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(nextSession);
       setUser(nextSession?.user ?? null);
 
+      if (event === "PASSWORD_RECOVERY") {
+        markPasswordRecoveryPending();
+        setPasswordRecoveryPending(true);
+        clearAuthParamsFromUrl();
+      }
+
       if (event === "SIGNED_IN" && nextSession?.user) {
         void ensureProfileRow(nextSession.user);
         identifyUser(nextSession.user.id);
@@ -129,6 +156,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (event === "SIGNED_OUT") {
+        clearPasswordRecoveryPending();
+        setPasswordRecoveryPending(false);
         resetAnalyticsUser();
         captureEvent("auth signed out");
       }
@@ -208,6 +237,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async (): Promise<void> => {
     const supabase = getSupabase();
     if (!supabase) return;
+    clearPasswordRecoveryPending();
+    setPasswordRecoveryPending(false);
     await supabase.auth.signOut();
   }, []);
 
@@ -227,6 +258,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     clearAllLocalAppData();
+    clearPasswordRecoveryPending();
+    setPasswordRecoveryPending(false);
     await supabase.auth.signOut();
     captureEvent("auth account deleted");
     return { error: null };
@@ -242,11 +275,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const { error } = await supabase.auth.resetPasswordForEmail(
         email.trim(),
         {
-          redirectTo: getAuthRedirectPath("/login"),
+          // iOS: deep link deve abrir a tela de nova senha, não o login.
+          redirectTo: getAuthRedirectPath(NEW_PASSWORD_PATH),
         },
       );
 
       return { error: mapAuthError(error) };
+    },
+    [],
+  );
+
+  const updatePassword = useCallback(
+    async (password: string): Promise<AuthResult> => {
+      const supabase = getSupabase();
+      if (!supabase) {
+        return { error: "Conta na nuvem não configurada neste ambiente." };
+      }
+
+      const { error } = await supabase.auth.updateUser({ password });
+      if (error) {
+        return { error: mapAuthError(error) };
+      }
+
+      clearPasswordRecoveryPending();
+      setPasswordRecoveryPending(false);
+      captureEvent("auth password updated");
+      return { error: null };
     },
     [],
   );
@@ -258,28 +312,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isLoading,
       isAuthenticated: Boolean(user),
       authConfigured: isSupabaseConfigured(),
+      passwordRecoveryPending,
       signIn,
       signUp,
       signOut,
       deleteAccount,
       resetPassword,
+      updatePassword,
+      clearPasswordRecovery,
     }),
     [
       user,
       session,
       isLoading,
+      passwordRecoveryPending,
       signIn,
       signUp,
       signOut,
       deleteAccount,
       resetPassword,
+      updatePassword,
+      clearPasswordRecovery,
     ],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
-export const AUTH_ROUTE_PREFIXES = ["/login", "/cadastro", "/recuperar-senha"];
+export const AUTH_ROUTE_PREFIXES = [
+  "/login",
+  "/cadastro",
+  "/recuperar-senha",
+  NEW_PASSWORD_PATH,
+];
 
 export function isAuthRoute(pathname: string): boolean {
   return AUTH_ROUTE_PREFIXES.some(
