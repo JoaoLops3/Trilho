@@ -32,3 +32,16 @@ export const themeColors = {
     elevated: "#2d2d3a",
   },
 } as const;
+
+/** Sombras canônicas — espelham `tailwind.config.js` boxShadow.extend. */
+export const themeShadows = {
+  glowMint: "0 0 40px rgba(52, 211, 153, 0.15)",
+  glowMintXs: "0 0 20px rgba(52, 211, 153, 0.15)",
+  glowMintSm: "0 0 20px rgba(52, 211, 153, 0.2)",
+  glowMintMd: "0 0 30px rgba(52, 211, 153, 0.25)",
+  glowMintLg: "0 0 40px rgba(52, 211, 153, 0.25)",
+  glowMintFab: "0 0 24px rgba(52, 211, 153, 0.35)",
+  glowMintActive: "0 0 20px rgba(52, 211, 153, 0.5)",
+  elevated: "0 8px 30px rgba(0, 0, 0, 0.4)",
+  card: "0 4px 20px rgba(0, 0, 0, 0.3)",
+} as const;

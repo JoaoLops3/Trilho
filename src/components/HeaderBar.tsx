@@ -38,10 +38,7 @@ export function HeaderBar({
           className="relative touch-manipulation"
           aria-label="Abrir perfil"
         >
-          <div
-            className="w-11 h-11 rounded-2xl bg-gradient-to-br from-mint-400 to-electric-500 p-0.5"
-            style={{ boxShadow: "0 0 20px rgba(52, 211, 153, 0.2)" }}
-          >
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-mint-400 to-electric-500 p-0.5 shadow-glow-mint-sm">
             {avatarSeed ? (
               <Avatar
                 seed={avatarSeed}

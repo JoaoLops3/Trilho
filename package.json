@@ -16,6 +16,7 @@
     "test:sync": "node --test scripts/validate-sync-push-before-pull.mjs",
     "test:auth": "node --test scripts/validate-auth-signout-wipe.mjs",
     "test:rls": "node --test scripts/validate-rls-initplan.mjs",
+    "test:tokens": "node --test scripts/validate-design-tokens.mjs",
     "cap:sync": "npm run build && npx cap sync ios",
     "cap:ios": "npm run cap:sync && npx cap open ios",
     "cap:open:ios": "npx cap open ios"

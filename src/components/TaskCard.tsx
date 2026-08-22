@@ -115,8 +115,7 @@ export const TaskCard = memo(
               initial={{ scaleY: 0 }}
               animate={{ scaleY: 1 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
-              className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-mint-400 to-mint-500 origin-top"
-              style={{ boxShadow: "0 0 20px rgba(52, 211, 153, 0.5)" }}
+              className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-mint-400 to-mint-500 origin-top shadow-glow-mint-active"
             />
             <motion.div
               initial={{ scaleX: 0 }}
@@ -139,10 +138,7 @@ export const TaskCard = memo(
               captureEvent(eventName, taskAnalyticsProps(task));
               onStatusChange?.(task.id, nextStatus);
             }}
-            className={`relative ${compact ? "w-10 h-10" : "w-12 h-12"} rounded-2xl flex items-center justify-center transition-colors duration-200 ${isActive ? "bg-mint-500/20" : "bg-surface-tertiary hover:bg-surface-elevated"}`}
-            style={
-              isActive ? { boxShadow: "0 0 20px rgba(52, 211, 153, 0.15)" } : {}
-            }
+            className={`relative ${compact ? "w-10 h-10" : "w-12 h-12"} rounded-2xl flex items-center justify-center transition-colors duration-200 ${isActive ? "bg-mint-500/20 shadow-glow-mint-xs" : "bg-surface-tertiary hover:bg-surface-elevated"}`}
           >
             {task.status === "active" ? (
               <motion.div
