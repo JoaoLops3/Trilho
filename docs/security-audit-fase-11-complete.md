@@ -88,3 +88,26 @@ Trilho passou de frontend-only para **auth + sync na nuvem**. Auditoria alinhada
 **Aprovado para uso com sync na nuvem** (pré-loja). Revisitar antes de produção pública se: Edge Functions, Storage, ou push remoto forem adicionados.
 
 Próxima revisão obrigatória: ao adicionar `supabase/functions/` ou Storage buckets.
+
+---
+
+## Re-audit nota 10 (2026-08-22)
+
+Escopo: plano [`plano-seguranca.md`](./plano-seguranca.md) — env boot, guardrails, auth input, deep links, npm audit CI, threat model.
+
+| # | Critério | Status |
+|---|----------|--------|
+| 1 | Segredos fora do git/bundle privilegiado | ✅ gitleaks + `test:security` |
+| 2 | Env validada no boot (Zod) | ✅ `src/lib/env.ts` + `test:env` |
+| 3 | RLS + ownership | ✅ mantido |
+| 4 | Token auth Keychain nativo | ✅ `secure-auth-storage.ts` |
+| 5 | Erros auth sem vazamento | ✅ `mapAuthError` + guardrail |
+| 6 | Input usuário validado | ✅ `auth-validation.ts` (senha 8+ cadastro) |
+| 7 | Analytics sem PII | ✅ `analytics-task.ts` + guardrail |
+| 8 | Storage local íntegro | ✅ PR #38 |
+| 9 | Supply chain CI | ✅ `npm audit --production --audit-level=high` |
+| 10 | Deep links / recovery | ✅ `parseAuthDeepLinkUrl` + limpeza sessão |
+| 11 | Threat model | ✅ [`threat-model-seguranca.md`](./threat-model-seguranca.md) |
+| 12 | Guardrail `test:security` | ✅ na suite `npm run test` |
+
+**Gate:** PASS — zero CRITICAL/HIGH em aberto no escopo do app. WARN `delete_own_account` DEFINER permanece aceito em [`security-definer-accept.md`](./security-definer-accept.md).

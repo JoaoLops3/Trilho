@@ -130,6 +130,8 @@ Rodar após cada PR que altera `supabase/migrations/`, `src/lib/supabase.ts` ou 
 
 - Prompt: `.cursor/plans/auditoria_supabase_gate.prompt.md`
 - Relatório: `docs/security-audit-fase-11-complete.md`
+- Threat model: [`docs/threat-model-seguranca.md`](./threat-model-seguranca.md)
+- Plano nota 10: [`docs/plano-seguranca.md`](./plano-seguranca.md)
 - Bloqueio: zero achados **CRITICAL** / **HIGH** em aberto
 
 ## Referências
