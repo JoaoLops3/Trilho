@@ -2,11 +2,6 @@ import type { AuthError } from "@supabase/supabase-js";
 
 import {
   INVALID_EMAIL_MESSAGE,
-  validateAuthEmail,
-  validateDisplayName,
-  validateLoginPassword,
-  validateNickname,
-  validateSignupPasswordConfirmation,
   WEAK_PASSWORD_MESSAGE,
 } from "./auth-validation";
 import { reportError } from "./observability";
