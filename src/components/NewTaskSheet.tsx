@@ -5,16 +5,13 @@ import { Clock, X } from "lucide-react";
 import { DurationFields } from "./DurationFields";
 import { WeekdayPicker } from "./WeekdayPicker";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
+import { useFocusTrap } from "../lib/a11y-focus";
 import { dayKey } from "../lib/day-stats";
 import {
   DEFAULT_DURATION_SECONDS,
   validateDurationSeconds,
 } from "../lib/task-duration";
-import {
-  dayNumber,
-  getWeekDays,
-  weekdayShortLabel,
-} from "../lib/week-utils";
+import { dayNumber, getWeekDays, weekdayShortLabel } from "../lib/week-utils";
 import type { Task, TaskPriority } from "../types/task";
 import type { RoutineTemplate, RoutineTemplateInput } from "../types/routine";
 
@@ -72,7 +69,9 @@ export function NewTaskSheet({
   routineToEdit,
 }: NewTaskSheetProps) {
   const keyboardInset = useKeyboardInset(isOpen);
+  const sheetRef = useRef<HTMLDivElement>(null);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  useFocusTrap(sheetRef, isOpen);
   const [mode, setMode] = useState<"task" | "routine">("task");
   const [title, setTitle] = useState("");
   const [category, setCategory] = useState<string>(categories[0]);
@@ -131,7 +130,14 @@ export function NewTaskSheet({
       }, 320);
       return () => window.clearTimeout(focusTimer);
     }
-  }, [isOpen, taskToEdit, routineToEdit, routineOnly, defaultScheduledDate, today]);
+  }, [
+    isOpen,
+    taskToEdit,
+    routineToEdit,
+    routineOnly,
+    defaultScheduledDate,
+    today,
+  ]);
 
   const trimmedTitle = title.trim();
   const durationError = validateDurationSeconds(durationSeconds);
@@ -222,6 +228,10 @@ export function NewTaskSheet({
           />
 
           <motion.div
+            ref={sheetRef}
+            role="dialog"
+            aria-modal="true"
+            aria-label={heading}
             className="relative w-full max-w-lg card-glass rounded-t-3xl rounded-b-none p-5 pb-8 max-h-[min(85dvh,100%)] overflow-y-auto"
             style={{
               paddingBottom: "calc(2rem + env(safe-area-inset-bottom))",

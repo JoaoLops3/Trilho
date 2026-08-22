@@ -17,6 +17,7 @@ import {
   hasSeenNotificationPermissionPrompt,
   markNotificationPermissionPromptSeen,
 } from "./notification-permission-prompt";
+import { useToast } from "./toast-context";
 
 interface TaskSheetContextValue {
   isNewTaskOpen: boolean;
@@ -63,6 +64,7 @@ export function TaskSheetProvider({
   createTask,
   updateTask,
 }: TaskSheetProviderProps) {
+  const { success: showSuccessToast } = useToast();
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [createTaskDatePrefill, setCreateTaskDatePrefill] = useState<
@@ -114,12 +116,20 @@ export function TaskSheetProvider({
     (task: Task) => {
       if (editingTaskId) {
         updateTask(task);
+        showSuccessToast("Tarefa atualizada");
       } else {
         createTask(task);
+        showSuccessToast("Tarefa criada");
         maybePromptNotificationPermission(task);
       }
     },
-    [editingTaskId, updateTask, createTask, maybePromptNotificationPermission],
+    [
+      editingTaskId,
+      updateTask,
+      createTask,
+      maybePromptNotificationPermission,
+      showSuccessToast,
+    ],
   );
 
   const dismissNotificationPermissionPrompt = useCallback(() => {
