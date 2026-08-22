@@ -150,8 +150,7 @@ export function ProfileScreen() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 aria-label="Alterar avatar"
-                className="mt-4 w-20 h-20 rounded-3xl bg-gradient-to-br from-mint-400 to-electric-500 p-0.5 touch-manipulation"
-                style={{ boxShadow: "0 0 30px rgba(52, 211, 153, 0.25)" }}
+                className="mt-4 w-20 h-20 rounded-3xl bg-gradient-to-br from-mint-400 to-electric-500 p-0.5 touch-manipulation shadow-glow-mint-md"
               >
                 <div className="w-full h-full rounded-[22px] bg-surface-primary flex items-center justify-center overflow-hidden">
                   {profile.avatarSeed ? (
@@ -241,7 +240,10 @@ export function ProfileScreen() {
                   icon={Sparkles}
                   label="Montar nova rotina"
                   onClick={() =>
-                    history.push("/rotina/montar", tabNavigationState("profile"))
+                    history.push(
+                      "/rotina/montar",
+                      tabNavigationState("profile"),
+                    )
                   }
                 />
                 <SettingsRow

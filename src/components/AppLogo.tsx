@@ -11,8 +11,7 @@ export function AppLogo({ size = 64, className = "" }: AppLogoProps) {
       width={size}
       height={size}
       decoding="async"
-      className={`rounded-[22px] ${className}`}
-      style={{ boxShadow: "0 0 40px rgba(52, 211, 153, 0.25)" }}
+      className={`rounded-[22px] shadow-glow-mint-lg ${className}`}
     />
   );
 }

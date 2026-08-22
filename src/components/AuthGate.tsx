@@ -2,11 +2,7 @@ import { type ReactNode, useEffect, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { SplashScreen } from "@capacitor/splash-screen";
 import { Redirect, useLocation } from "react-router-dom";
-import {
-  useAuth,
-  isAuthRoute,
-  NEW_PASSWORD_PATH,
-} from "../lib/auth-context";
+import { useAuth, isAuthRoute, NEW_PASSWORD_PATH } from "../lib/auth-context";
 import { useShouldOfferRoutineOnboarding } from "../lib/use-routine-onboarding-gate";
 import { AppLogo } from "./AppLogo";
 
@@ -15,8 +11,7 @@ const ONBOARDING_PATH = "/rotina/montar";
 function AuthLoadingScreen() {
   return (
     <div
-      className="fixed inset-0 z-0 flex items-center justify-center"
-      style={{ backgroundColor: "#0d0d12" }}
+      className="fixed inset-0 z-0 flex items-center justify-center bg-surface-primary"
       aria-busy="true"
       aria-label="Carregando"
     >

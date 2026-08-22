@@ -44,8 +44,7 @@ function TabButton({
       {isActive && (
         <motion.div
           layoutId="activeTabBg"
-          className="absolute inset-0 rounded-2xl"
-          style={{ background: "rgba(255, 255, 255, 0.05)" }}
+          className="absolute inset-0 rounded-2xl bg-white/5"
           transition={{ type: "spring", stiffness: 500, damping: 30 }}
           aria-hidden="true"
         />
@@ -136,7 +135,7 @@ export function CustomTabBar() {
               aria-label="Adicionar nova tarefa"
               className="relative flex items-center justify-center p-2 rounded-2xl transition-colors touch-manipulation"
             >
-              <div className="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-mint-400 to-emerald-500 shadow-[0_0_24px_rgba(52,211,153,0.35)]">
+              <div className="relative z-10 flex items-center justify-center w-12 h-12 rounded-full bg-gradient-to-br from-mint-400 to-emerald-500 shadow-glow-mint-fab">
                 <Plus
                   className="w-6 h-6 text-obsidian-950"
                   strokeWidth={2.5}
