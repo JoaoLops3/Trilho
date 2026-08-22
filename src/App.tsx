@@ -33,7 +33,7 @@ import { NotificationPermissionSheet } from "./components/NotificationPermission
 import { AnalyticsConsentSheet } from "./components/AnalyticsConsentSheet";
 import { syncNativeSchedulesFromStorage } from "./lib/native-notifications";
 import { handleAuthDeepLink } from "./lib/auth-deeplink";
-import { captureException } from "./lib/posthog";
+import { installGlobalErrorHandlers, reportError } from "./lib/observability";
 import { MotionProvider } from "./lib/motion";
 
 const AgendaScreen = lazy(() =>
@@ -316,6 +316,8 @@ function AppRoutes() {
 }
 
 function App() {
+  useEffect(() => installGlobalErrorHandlers(), []);
+
   useEffect(() => {
     if (Capacitor.isNativePlatform()) {
       document.documentElement.classList.add("native-platform");
@@ -333,7 +335,7 @@ function App() {
           err.message &&
           !err.message.includes("not implemented")
         ) {
-          captureException(err);
+          reportError(err, { surface: "native", operation: "status_bar_init" });
         }
       }
     };

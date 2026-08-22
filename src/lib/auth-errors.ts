@@ -1,9 +1,11 @@
 import type { AuthError } from "@supabase/supabase-js";
 
+import { reportError } from "./observability";
 import { PROFILE_HEADER_NAME_MAX_LENGTH } from "./profile-storage";
 
 /** Mensagem genérica — nunca devolver `error.message` cru do GoTrue ao usuário. */
-const GENERIC_AUTH_ERROR = "Não foi possível concluir. Tente novamente.";
+export const GENERIC_AUTH_ERROR =
+  "Não foi possível concluir. Tente novamente.";
 
 const MESSAGES: Record<string, string> = {
   invalid_credentials: "E-mail ou senha incorretos.",
@@ -81,6 +83,25 @@ export function mapAuthError(error: AuthError | null): string | null {
   }
 
   return GENERIC_AUTH_ERROR;
+}
+
+/**
+ * Traduz erro de Auth e reporta códigos desconhecidos para observabilidade.
+ * Erros mapeados (credenciais inválidas, etc.) não são enviados — são esperados.
+ */
+export function mapAuthErrorWithTelemetry(
+  error: AuthError | null,
+  operation: string,
+): string | null {
+  const mapped = mapAuthError(error);
+  if (error && mapped === GENERIC_AUTH_ERROR) {
+    reportError(error, {
+      surface: "auth",
+      operation,
+      authCode: error.code ?? undefined,
+    });
+  }
+  return mapped;
 }
 
 export function validateEmail(email: string): string | null {

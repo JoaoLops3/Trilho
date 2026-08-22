@@ -25,7 +25,8 @@ import type { AppNotification } from "../types/notification";
 import type { RoutineTemplate } from "../types/routine";
 import { useAuth } from "./auth-context";
 import { useToast } from "./toast-context";
-import { captureEvent, captureException } from "./posthog";
+import { reportError } from "./observability";
+import { captureEvent } from "./posthog";
 import {
   hasCloudData,
   markLocalImportDone,
@@ -120,8 +121,12 @@ export function SyncProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const notifySyncError = useCallback(
-    (err: unknown) => {
-      captureException(err instanceof Error ? err : new Error(String(err)));
+    (err: unknown, meta: { operation: string; pushKey?: string }) => {
+      reportError(err, {
+        surface: "sync",
+        operation: meta.operation,
+        pushKey: meta.pushKey,
+      });
       if (syncErrorNotifiedRef.current) return;
       syncErrorNotifiedRef.current = true;
       showToast("error", "Não foi possível sincronizar", {
@@ -190,7 +195,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
           await markLocalImportDone(uid);
         }
       } catch (err) {
-        notifySyncError(err);
+        notifySyncError(err, { operation: "initial_sync" });
       } finally {
         setIsSyncing(false);
         markInitialSyncComplete(true);
@@ -223,7 +228,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       syncErrorNotifiedRef.current = false;
       captureEvent("sync refreshed from cloud");
     } catch (err) {
-      notifySyncError(err);
+      notifySyncError(err, { operation: "refresh" });
     } finally {
       refreshInFlightRef.current = false;
       setIsSyncing(false);
@@ -256,7 +261,9 @@ export function SyncProvider({ children }: { children: ReactNode }) {
           captureEvent("sync started fresh on cloud");
         }
       } catch (err) {
-        notifySyncError(err);
+        notifySyncError(err, {
+          operation: useLocalData ? "import_local" : "import_fresh",
+        });
       } finally {
         setIsSyncing(false);
       }
@@ -278,7 +285,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
             syncErrorNotifiedRef.current = false;
           })
           .catch((err: unknown) => {
-            notifySyncError(err);
+            notifySyncError(err, { operation: "push", pushKey: key });
           });
       }, PUSH_DEBOUNCE_MS);
     },
@@ -315,7 +322,7 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         await syncProfileToCloud(userId, profile);
         syncErrorNotifiedRef.current = false;
       } catch (err) {
-        notifySyncError(err);
+        notifySyncError(err, { operation: "push_profile_immediate" });
       }
     },
     [userId, notifySyncError],
