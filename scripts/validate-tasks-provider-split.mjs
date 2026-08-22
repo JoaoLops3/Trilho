@@ -39,10 +39,14 @@ describe("tasks-provider-split", () => {
     assert.doesNotMatch(facade, /CapApp/);
   });
 
-  it("domínio usa lifecycle; sheet não importa CapApp", () => {
+  it("domínio usa lifecycle; sheet não importa domínio", () => {
     assert.match(
       read("src/lib/tasks-domain-context.tsx"),
       /useTaskAppLifecycle/,
+    );
+    assert.doesNotMatch(
+      read("src/lib/task-sheet-context.tsx"),
+      /from ["']\.\/tasks-domain-context/,
     );
     assert.doesNotMatch(
       read("src/lib/task-sheet-context.tsx"),

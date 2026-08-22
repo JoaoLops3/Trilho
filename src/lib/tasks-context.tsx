@@ -35,11 +35,24 @@ export function useActiveElapsed(task: Task | null | undefined): number {
   return task ? getLiveElapsed(task) : 0;
 }
 
+function TaskSheetBridge({ children }: { children: ReactNode }) {
+  const { tasks, createTask, updateTask } = useTasksDomain();
+  return (
+    <TaskSheetProvider
+      tasks={tasks}
+      createTask={createTask}
+      updateTask={updateTask}
+    >
+      {children}
+    </TaskSheetProvider>
+  );
+}
+
 /** Compositor: domínio → sheet. App.tsx continua importando só TasksProvider. */
 export function TasksProvider({ children }: { children: ReactNode }) {
   return (
     <TasksDomainProvider>
-      <TaskSheetProvider>{children}</TaskSheetProvider>
+      <TaskSheetBridge>{children}</TaskSheetBridge>
     </TasksDomainProvider>
   );
 }

@@ -17,7 +17,6 @@ import {
   hasSeenNotificationPermissionPrompt,
   markNotificationPermissionPromptSeen,
 } from "./notification-permission-prompt";
-import { useTasksDomain } from "./tasks-domain-context";
 
 interface TaskSheetContextValue {
   isNewTaskOpen: boolean;
@@ -47,12 +46,23 @@ export function useTaskSheet(): TaskSheetContextValue {
   return ctx;
 }
 
+export interface TaskSheetProviderProps {
+  children: ReactNode;
+  tasks: Task[];
+  createTask: (task: Task) => void;
+  updateTask: (task: Task) => void;
+}
+
 /**
  * Estado de UI do NewTaskSheet + prompt de permissão de notificação.
- * Mutações de dados ficam no TasksDomainProvider.
+ * Recebe mutações do domínio por props (sem acoplar ao módulo de domínio).
  */
-export function TaskSheetProvider({ children }: { children: ReactNode }) {
-  const { tasks, createTask, updateTask } = useTasksDomain();
+export function TaskSheetProvider({
+  children,
+  tasks,
+  createTask,
+  updateTask,
+}: TaskSheetProviderProps) {
   const [isNewTaskOpen, setIsNewTaskOpen] = useState(false);
   const [editingTaskId, setEditingTaskId] = useState<string | null>(null);
   const [createTaskDatePrefill, setCreateTaskDatePrefill] = useState<
