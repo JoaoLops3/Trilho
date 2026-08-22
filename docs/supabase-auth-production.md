@@ -24,14 +24,20 @@ http://127.0.0.1:5173/login
 http://localhost:5173/cadastro
 http://127.0.0.1:5173/cadastro
 http://localhost:5173/recuperar-senha
+http://localhost:5173/nova-senha
 https://SEU-DOMINIO.com/login
 https://SEU-DOMINIO.com/cadastro
 https://SEU-DOMINIO.com/recuperar-senha
+https://SEU-DOMINIO.com/nova-senha
 capacitor://localhost/login
+capacitor://localhost/nova-senha
 https://localhost/login
+https://localhost/nova-senha
 ```
 
 Substitua `SEU-DOMINIO.com` pelo domínio real quando publicar.
+
+**Importante (iOS):** o e-mail de recuperação deve abrir **`/nova-senha`**, não o login. O app usa `getAuthRedirectPath("/nova-senha")` em `resetPasswordForEmail`.
 
 ## Variável no app
 
@@ -43,22 +49,33 @@ VITE_APP_URL=https://SEU-DOMINIO.com
 
 Usada em:
 - confirmação de e-mail (`signUp`)
-- recuperação de senha (`resetPasswordForEmail`)
+- recuperação de senha (`resetPasswordForEmail` → `/nova-senha`)
 
 Sem essa variável, o app usa `window.location.origin` (ok em dev).
 
-## Capacitor (iOS/Android)
+## Capacitor (iOS)
 
 O app id é `com.joaolops3.trilho`. Para deep links de auth no nativo:
 
-1. Configure **Universal Links** (iOS) / **App Links** (Android) apontando para `https://SEU-DOMINIO.com/*`
-2. Mantenha `capacitor://localhost/login` como fallback de dev
-3. O handler em `src/lib/auth-deeplink.ts` processa tokens no retorno
+1. Configure **Universal Links** (iOS) apontando para `https://SEU-DOMINIO.com/*` (Associated Domains)
+2. Mantenha `capacitor://localhost/nova-senha` como fallback de dev
+3. `App.tsx` escuta `appUrlOpen` → `handleAuthDeepLink` (exchange code / setSession)
+4. `AuthGate` redireciona para `/nova-senha` quando `PASSWORD_RECOVERY` ou flag de recovery
+5. Tokens no hash/query são limpos na web após a sessão (`clearAuthParamsFromUrl`)
+
+## Fluxo de recuperação (critério iOS)
+
+1. Usuário em **Recuperar senha** → recebe e-mail
+2. Toca o link no Mail → abre o app (Universal Link / scheme)
+3. App autentica a sessão de recovery → tela **Nova senha**
+4. Usuário define senha (`updateUser`) → entra no app
+5. Consegue fazer login de novo com a senha nova
 
 ## Checklist pré-loja
 
 - [ ] Site URL = domínio de produção
-- [ ] Redirect URLs incluem `/login`, `/cadastro`, `/recuperar-senha`
-- [ ] `VITE_APP_URL` no build de produção
-- [ ] Testar fluxo: cadastro → e-mail → confirmar → login
-- [ ] Testar fluxo: esqueci senha → e-mail → redefinir
+- [ ] Redirect URLs incluem `/login`, `/cadastro`, `/recuperar-senha`, `/nova-senha`
+- [ ] `VITE_APP_URL` no build de produção iOS
+- [ ] Universal Links configurados no Xcode
+- [ ] Testar no **device**: cadastro → e-mail → confirmar → login
+- [ ] Testar no **device**: esqueci senha → Mail → app → nova senha → login

@@ -2,7 +2,11 @@ import { type ReactNode, useEffect, useRef } from "react";
 import { Capacitor } from "@capacitor/core";
 import { SplashScreen } from "@capacitor/splash-screen";
 import { Redirect, useLocation } from "react-router-dom";
-import { useAuth, isAuthRoute } from "../lib/auth-context";
+import {
+  useAuth,
+  isAuthRoute,
+  NEW_PASSWORD_PATH,
+} from "../lib/auth-context";
 import { useShouldOfferRoutineOnboarding } from "../lib/use-routine-onboarding-gate";
 import { AppLogo } from "./AppLogo";
 
@@ -22,7 +26,12 @@ function AuthLoadingScreen() {
 }
 
 export function AuthGate({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isLoading, authConfigured } = useAuth();
+  const {
+    isAuthenticated,
+    isLoading,
+    authConfigured,
+    passwordRecoveryPending,
+  } = useAuth();
   const location = useLocation();
   const pathname = location.pathname;
   const splashHiddenRef = useRef(false);
@@ -51,11 +60,26 @@ export function AuthGate({ children }: { children: ReactNode }) {
     return <>{children}</>;
   }
 
+  // Recovery (iOS deep link / web): força a tela de nova senha antes do app.
+  if (
+    isAuthenticated &&
+    passwordRecoveryPending &&
+    pathname !== NEW_PASSWORD_PATH
+  ) {
+    return <Redirect to={NEW_PASSWORD_PATH} />;
+  }
+
   if (!isAuthenticated && !isAuthRoute(pathname)) {
     return <Redirect to="/login" />;
   }
 
-  if (isAuthenticated && (pathname === "/login" || pathname === "/cadastro")) {
+  if (
+    isAuthenticated &&
+    !passwordRecoveryPending &&
+    (pathname === "/login" ||
+      pathname === "/cadastro" ||
+      pathname === NEW_PASSWORD_PATH)
+  ) {
     // Evita piscar o Dashboard: só redireciona quando a decisão estiver pronta.
     if (!onboardingReady) {
       return <AuthLoadingScreen />;

@@ -17,7 +17,7 @@ import { ScreenLoadingSkeleton } from "./components/ScreenLoadingSkeleton";
 import { ErrorBoundary } from "./components/ErrorBoundary";
 import { TasksProvider, useTasks } from "./lib/tasks-context";
 import { RoutinesProvider, useRoutines } from "./lib/routines-context";
-import { AuthProvider, isAuthRoute } from "./lib/auth-context";
+import { AuthProvider, isAuthRoute, NEW_PASSWORD_PATH } from "./lib/auth-context";
 import { AuthGate } from "./components/AuthGate";
 import { SyncProvider } from "./lib/sync-context";
 import { ProfileProvider } from "./lib/profile-context";
@@ -73,6 +73,7 @@ const OnboardingRoutineScreen = lazy(() =>
 import { LoginScreen } from "./screens/LoginScreen";
 import { SignUpScreen } from "./screens/SignUpScreen";
 import { ForgotPasswordScreen } from "./screens/ForgotPasswordScreen";
+import { NewPasswordScreen } from "./screens/NewPasswordScreen";
 
 setupIonicReact({
   mode: "ios",
@@ -284,6 +285,15 @@ function AppRoutes() {
                 </ErrorBoundary>
               )}
             />
+            <Route
+              exact
+              path={NEW_PASSWORD_PATH}
+              render={() => (
+                <ErrorBoundary context="new-password">
+                  <NewPasswordScreen />
+                </ErrorBoundary>
+              )}
+            />
           </Switch>
         </IonRouterOutlet>
       </AuthGate>
@@ -331,6 +341,7 @@ function App() {
     });
 
     const urlListener = CapApp.addListener("appUrlOpen", (event) => {
+      // Marca recovery + troca sessão; AuthGate redireciona para /nova-senha.
       void handleAuthDeepLink(event.url);
     });
 

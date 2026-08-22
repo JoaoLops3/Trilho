@@ -3,8 +3,7 @@ import type { AuthError } from "@supabase/supabase-js";
 import { PROFILE_HEADER_NAME_MAX_LENGTH } from "./profile-storage";
 
 /** Mensagem genérica — nunca devolver `error.message` cru do GoTrue ao usuário. */
-const GENERIC_AUTH_ERROR =
-  "Não foi possível concluir. Tente novamente.";
+const GENERIC_AUTH_ERROR = "Não foi possível concluir. Tente novamente.";
 
 const MESSAGES: Record<string, string> = {
   invalid_credentials: "E-mail ou senha incorretos.",
@@ -17,8 +16,7 @@ const MESSAGES: Record<string, string> = {
   over_request_rate_limit:
     "Muitas tentativas. Aguarde um momento e tente de novo.",
   same_password: "A nova senha deve ser diferente da atual.",
-  session_expired:
-    "Sessão expirada. Solicite um novo link de recuperação.",
+  session_expired: "Sessão expirada. Solicite um novo link de recuperação.",
 };
 
 /** Códigos estáveis do GoTrue (`AuthError.code`) quando presentes. */
