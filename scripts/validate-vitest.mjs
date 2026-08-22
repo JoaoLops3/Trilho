@@ -30,6 +30,8 @@ const DOMAIN_TEST_FILES = [
   "src/lib/sync/cloud-sync.test.ts",
   "src/lib/storage-runtime.test.ts",
   "src/lib/env.test.ts",
+  "src/lib/auth-validation.test.ts",
+  "src/lib/auth-deeplink.test.ts",
 ];
 
 describe("vitest — bootstrap", () => {
