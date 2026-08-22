@@ -14,6 +14,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
     "test:sync": "node --test scripts/validate-sync-push-before-pull.mjs",
+    "test:auth": "node --test scripts/validate-auth-signout-wipe.mjs",
     "cap:sync": "npm run build && npx cap sync ios",
     "cap:ios": "npm run cap:sync && npx cap open ios",
     "cap:open:ios": "npx cap open ios"

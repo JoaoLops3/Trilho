@@ -62,6 +62,13 @@ O app **sempre** grava local primeiro (cache offline). Quando autenticado, envia
 - Push remoto via Edge Functions — adiado (requer FCM/APNs + tokens)
 - Ícones customizados de push e tipos `daily_goal_reached` / `streak_milestone` nativos — Fase 8.5 / 11.3b
 
+## Logout
+
+- Com sessão ativa, `signOut` chama `clearAllLocalAppData()` antes de `supabase.auth.signOut()` — o próximo login no mesmo aparelho não herda tarefas, perfil ou histórico do usuário anterior.
+- A UI recarrega a página após logout (`ProfileScreen`, cancelar em `NewPasswordScreen`) para reinicializar providers com storage vazio; só limpar `localStorage` deixaria estado em memória stale até o reload.
+- `deleteAccount` continua limpando local + RPC + signOut; o wipe no `signOut` é idempotente se chamado em sequência.
+- PostHog: o listener `SIGNED_OUT` em `auth-context` dispara `resetAnalyticsUser` e o evento `auth signed out`.
+
 ## Segurança
 
 - RLS garante `auth.uid() = user_id` em todas as tabelas.

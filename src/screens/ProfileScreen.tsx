@@ -105,6 +105,7 @@ export function ProfileScreen() {
     try {
       await signOut();
       history.replace("/login");
+      window.location.reload();
     } finally {
       setIsSigningOut(false);
     }

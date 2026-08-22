@@ -108,8 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(isSupabaseConfigured());
-  const [passwordRecoveryPending, setPasswordRecoveryPending] = useState(
-    () => readPasswordRecoveryPending(),
+  const [passwordRecoveryPending, setPasswordRecoveryPending] = useState(() =>
+    readPasswordRecoveryPending(),
   );
 
   const clearPasswordRecovery = useCallback(() => {
@@ -237,10 +237,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = useCallback(async (): Promise<void> => {
     const supabase = getSupabase();
     if (!supabase) return;
+
+    const hadSession = Boolean(session?.user ?? user);
     clearPasswordRecoveryPending();
     setPasswordRecoveryPending(false);
+
+    if (hadSession) {
+      clearAllLocalAppData();
+    }
+
     await supabase.auth.signOut();
-  }, []);
+  }, [session, user]);
 
   const deleteAccount = useCallback(async (): Promise<AuthResult> => {
     const supabase = getSupabase();
