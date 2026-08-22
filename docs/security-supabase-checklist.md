@@ -32,6 +32,7 @@ Regras obrigatórias antes de merge na `main` e antes de releases com dados na n
 | `SECURITY DEFINER` | Sempre `SET search_path = public` (ou schema privado) |
 | Triggers only | Revogar EXECUTE de funções trigger-only (`handle_new_user`) para anon/authenticated |
 | Sem RPC público desnecessário | Funções expostas via PostgREST devem validar `auth.uid()` |
+| `delete_own_account` | WARN do Advisor **aceito** — ver [`docs/security-definer-accept.md`](./security-definer-accept.md) |
 
 ## Edge Functions (quando existirem)
 
@@ -78,7 +79,7 @@ Migration: `supabase/migrations/20260715140000_harden_input_checks.sql`
 | HTTPS em produção (Supabase, PostHog, DiceBear) | ok |
 | RLS em 5 tabelas + policies CRUD own-user | ok |
 | Sem policy `USING (true)` | ok |
-| Exclusão de conta (`delete_own_account` + CASCADE + wipe local) | ok |
+| Exclusão de conta (`delete_own_account` + CASCADE + wipe local) | ok — aceite DEFINER em [`security-definer-accept.md`](./security-definer-accept.md) |
 | Sem Edge Functions | ok |
 | PostHog sem título de tarefa / notas | ok |
 | PostHog nativo: sem session recording / autocapture | ok |
@@ -134,3 +135,4 @@ Rodar após cada PR que altera `supabase/migrations/`, `src/lib/supabase.ts` ou 
 
 - [`docs/supabase.md`](./supabase.md) — arquitetura e setup
 - [`docs/sync-behavior.md`](./sync-behavior.md) — offline e conflitos
+- [`docs/security-definer-accept.md`](./security-definer-accept.md) — aceite do WARN em `delete_own_account`
