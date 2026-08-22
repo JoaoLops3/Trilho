@@ -4,7 +4,7 @@ import { motion } from "../lib/motion";
 import { AuthFormField } from "../components/AuthFormField";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
 import { useAuth } from "../lib/auth-context";
-import { validatePasswordConfirmation } from "../lib/auth-errors";
+import { validateSignupPasswordConfirmation as validatePasswordConfirmation } from "../lib/auth-validation";
 
 /**
  * Definir nova senha após o link de recovery (e-mail → iOS deep link / web).

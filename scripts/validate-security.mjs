@@ -132,4 +132,15 @@ describe("security — repo e CI", () => {
       /"test:security": "node --test scripts\/validate-security.mjs"/,
     );
   });
+
+  it("telas auth importam auth-validation", () => {
+    for (const path of [
+      "src/screens/LoginScreen.tsx",
+      "src/screens/ForgotPasswordScreen.tsx",
+      "src/screens/NewPasswordScreen.tsx",
+      "src/components/AuthScreenLayout.tsx",
+    ]) {
+      assert.match(read(path), /auth-validation/, `${path} deve usar auth-validation`);
+    }
+  });
 });

@@ -6,7 +6,10 @@ import { ChevronLeft } from "lucide-react";
 import { OrbBackground } from "../components/OrbBackground";
 import { AuthFormField } from "../components/AuthFormField";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
-import { validateEmail, validatePassword } from "../lib/auth-errors";
+import {
+  validateAuthEmail as validateEmail,
+  validateLoginPassword as validatePassword,
+} from "../lib/auth-validation";
 
 interface AuthScreenLayoutProps {
   title: string;

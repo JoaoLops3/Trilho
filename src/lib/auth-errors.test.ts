@@ -86,18 +86,19 @@ describe("validateEmail", () => {
 });
 
 describe("validatePassword", () => {
-  it("exige mínimo de 6 caracteres", () => {
+  it("login aceita senha legada curta; cadastro exige 8+", () => {
     expect(validatePassword("")).toBe("Informe sua senha.");
-    expect(validatePassword("12345")).toBe(
-      "A senha deve ter pelo menos 6 caracteres.",
-    );
     expect(validatePassword("123456")).toBeNull();
+    expect(validatePasswordConfirmation("1234567", "1234567")).toBe(
+      "A senha deve ter pelo menos 8 caracteres.",
+    );
+    expect(validatePasswordConfirmation("12345678", "12345678")).toBeNull();
   });
 });
 
 describe("validatePasswordConfirmation", () => {
   it("exige senhas iguais", () => {
-    expect(validatePasswordConfirmation("123456", "654321")).toBe(
+    expect(validatePasswordConfirmation("12345678", "87654321")).toBe(
       "As senhas não coincidem.",
     );
   });

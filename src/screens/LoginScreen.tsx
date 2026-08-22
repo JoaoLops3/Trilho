@@ -11,10 +11,10 @@ import { useKeyboardInset } from "../hooks/useKeyboardInset";
 import { APP_NAME, APP_TAGLINE, APP_VERSION } from "../lib/app-brand";
 import {
   validateDisplayName,
-  validateEmail,
-  validatePassword,
-  validatePasswordConfirmation,
-} from "../lib/auth-errors";
+  validateAuthEmail as validateEmail,
+  validateLoginPassword as validatePassword,
+  validateSignupPasswordConfirmation as validatePasswordConfirmation,
+} from "../lib/auth-validation";
 
 type AuthMode = "login" | "signup";
 

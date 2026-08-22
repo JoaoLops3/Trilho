@@ -4,7 +4,7 @@ import { motion } from "../lib/motion";
 import { AuthFormField } from "../components/AuthFormField";
 import { AuthScreenLayout } from "../components/AuthScreenLayout";
 import { useAuth } from "../lib/auth-context";
-import { validateEmail } from "../lib/auth-errors";
+import { validateAuthEmail as validateEmail } from "../lib/auth-validation";
 
 export function ForgotPasswordScreen() {
   const history = useHistory();
