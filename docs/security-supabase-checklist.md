@@ -95,9 +95,32 @@ Migration: `supabase/migrations/20260715140000_harden_input_checks.sql`
 
 | Item | Prioridade | Ação |
 |------|------------|------|
-| Privacy Nutrition Labels | **Crítico** | Declarar PostHog (Analytics: Product Interaction, Device ID, Diagnostics; Linked to User: Yes). Declarar Supabase como backend próprio (Contact Info, User Content). |
-| Leaked Password Protection | Desejável | Dashboard → Authentication → Password → ativar HaveIBeenPwned |
+| Privacy Nutrition Labels | **Crítico** | Ver checklist detalhado abaixo (App Store Connect). |
+| Leaked Password Protection (HaveIBeenPwned) | **Desejável** (Pro+) | [Auth → Email / Password](https://supabase.com/dashboard/project/qellobflykthabmauicb/auth/providers?provider=Email) → ativar **Prevent use of leaked passwords**. Requer plano **Pro** ou superior; não dá para ligar via migration/código. |
+| Zoom / viewport (a11y) | ok no código | `index.html` sem `user-scalable=no` / `maximum-scale=1` — pinch-to-zoom liberado (branch `chore/app-store-checklist`). |
 | `npx cap sync ios` após instalar secure-storage | Importante | Rodar após merge para linkar plugin nativo |
+
+#### Privacy Nutrition Labels (App Store Connect)
+
+Em **App Privacy** do app, declarar o que o Trilho coleta:
+
+| Fonte | Tipos típicos | Linked to User | Tracking |
+|-------|---------------|----------------|----------|
+| **PostHog** (só com consentimento) | Product Interaction, Device ID, Diagnostics / Performance | Yes | No (sem ads; analytics de produto) |
+| **Supabase** (auth + sync) | Contact Info (e-mail), User Content (tarefas, perfil, rotinas) | Yes | No |
+
+Notas:
+
+- PostHog fica **off** até o usuário conceder consentimento (`AnalyticsConsentSheet`).
+- Não declarar dados que o app não coleta (localização, contatos da agenda, etc.).
+- Revisar o texto da tela **Política de privacidade** e `public/privacidade.html` se a declaração mudar.
+
+#### HaveIBeenPwned — como validar
+
+1. Plano Pro+ no projeto Supabase.
+2. Ativar o toggle no link acima e salvar.
+3. Rodar Security Advisor: o aviso `auth_leaked_password_protection` deve sumir.
+4. Teste rápido: cadastro com senha vazada conhecida (ex. `password123`) deve falhar; senha forte aleatória deve passar.
 
 ## Gate de auditoria
 
