@@ -2,10 +2,10 @@
 
 ## Modos
 
-| Modo | Persistência | Nuvem |
-|------|--------------|-------|
-| Guest (sem login) | `localStorage` apenas | Não |
-| Logado | `localStorage` + Supabase | Sim |
+| Modo              | Persistência              | Nuvem |
+| ----------------- | ------------------------- | ----- |
+| Guest (sem login) | `localStorage` apenas     | Não   |
+| Logado            | `localStorage` + Supabase | Sim   |
 
 O app **sempre** grava local primeiro (cache offline). Quando autenticado, envia alterações para o Supabase com debounce de ~800 ms.
 
@@ -19,8 +19,18 @@ O app **sempre** grava local primeiro (cache offline). Quando autenticado, envia
 ## Conflitos (MVP)
 
 - Estratégia: **last-write-wins** por snapshot completo.
-- Ao reabrir o app nativo, faz pull da nuvem (pode sobrescrever edições offline feitas em outro device sem sync).
-- Sem fila de writes offline além do cache local — edições offline neste aparelho são empurradas no próximo debounce se houver rede.
+- Ao reabrir o app nativo (foreground), o refresh é **push-before-pull**: cancela os debounces pendentes, empurra o snapshot local inteiro (`pushUserSnapshot`) e só então faz o pull. Edição offline feita **neste aparelho** não é sobrescrita pelo snapshot remoto.
+- O refresh de foreground só roda depois do initial sync completo — um device zerado pré-pull nunca empurra snapshot vazio (o diff+delete apagaria os dados da conta).
+- Entre devices continua LWW: outro aparelho pode ganhar no pull seguinte ao push local.
+- Sem fila de writes offline além do cache local — edições offline neste aparelho são empurradas no próximo debounce se houver rede, ou no push do próximo foreground.
+
+## Falhas de sync (feedback visual)
+
+- `cloud-sync.ts` propaga erros do supabase-js (`assertNoSyncError`) — antes, um upsert falho passava por sucesso e o diff+delete podia apagar linhas na nuvem.
+- Pull com erro lança exceção em vez de virar snapshot vazio (que apagaria o cache local no `applySnapshot`).
+- Push/pull falho mostra toast de erro com ação **Tentar novamente** (reexecuta o refresh). Um toast por falha; reseta em qualquer sync bem-sucedido. Erros também vão para o PostHog (`captureException`).
+- `SyncStatusIndicator` montado no app (junto do `ImportLocalDataSheet`): mostra "Sincronizando" durante sync ativo e "Offline" sem rede com sessão ativa.
+- Validação automatizada sem Vitest: `npm run test:sync` (checa ordem push→pull, asserts de erro, indicator montado e docs).
 
 ### Histórico diário (`day_history`)
 

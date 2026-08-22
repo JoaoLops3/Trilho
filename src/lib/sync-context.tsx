@@ -24,7 +24,8 @@ import type { UserProfile } from "../types/avatar";
 import type { AppNotification } from "../types/notification";
 import type { RoutineTemplate } from "../types/routine";
 import { useAuth } from "./auth-context";
-import { captureEvent } from "./posthog";
+import { useToast } from "./toast-context";
+import { captureEvent, captureException } from "./posthog";
 import {
   hasCloudData,
   markLocalImportDone,
@@ -94,6 +95,7 @@ function persistSnapshotLocally(snapshot: UserDataSnapshot): void {
 
 export function SyncProvider({ children }: { children: ReactNode }) {
   const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { showToast } = useToast();
   const userId = user?.id ?? null;
 
   const [isSyncing, setIsSyncing] = useState(false);
@@ -106,6 +108,35 @@ export function SyncProvider({ children }: { children: ReactNode }) {
     {},
   );
   const initialSyncDoneRef = useRef<string | null>(null);
+  const initialSyncCompleteRef = useRef(false);
+  const refreshInFlightRef = useRef(false);
+  const refreshFromCloudRef = useRef<(() => Promise<void>) | null>(null);
+  // Evita empilhar toasts iguais quando vários pushes falham em sequência.
+  const syncErrorNotifiedRef = useRef(false);
+
+  const markInitialSyncComplete = useCallback((complete: boolean) => {
+    initialSyncCompleteRef.current = complete;
+    setInitialSyncComplete(complete);
+  }, []);
+
+  const notifySyncError = useCallback(
+    (err: unknown) => {
+      captureException(err instanceof Error ? err : new Error(String(err)));
+      if (syncErrorNotifiedRef.current) return;
+      syncErrorNotifiedRef.current = true;
+      showToast("error", "Não foi possível sincronizar", {
+        message: "Suas alterações continuam salvas neste aparelho.",
+        action: {
+          label: "Tentar novamente",
+          onClick: () => {
+            syncErrorNotifiedRef.current = false;
+            void refreshFromCloudRef.current?.();
+          },
+        },
+      });
+    },
+    [showToast],
+  );
 
   const registerSyncHandlers = useCallback((handlers: SyncHandlers) => {
     handlersRef.current = { ...handlersRef.current, ...handlers };
@@ -158,25 +189,56 @@ export function SyncProvider({ children }: { children: ReactNode }) {
         } else {
           await markLocalImportDone(uid);
         }
+      } catch (err) {
+        notifySyncError(err);
       } finally {
         setIsSyncing(false);
-        setInitialSyncComplete(true);
+        markInitialSyncComplete(true);
       }
     },
-    [applySnapshot],
+    [applySnapshot, notifySyncError, markInitialSyncComplete],
   );
 
+  const flushPendingPushes = useCallback(() => {
+    Object.values(pushTimersRef.current).forEach(clearTimeout);
+    pushTimersRef.current = {};
+  }, []);
+
   const refreshFromCloud = useCallback(async () => {
-    if (!userId) return;
+    if (!userId || importPromptOpen) return;
+    // Antes do first sync o cache local pode ser um device zerado; um push
+    // aqui apagaria os dados da conta via diff+delete. O initial sync cobre
+    // esse caminho.
+    if (!initialSyncCompleteRef.current) return;
+    if (refreshInFlightRef.current) return;
+    refreshInFlightRef.current = true;
     setIsSyncing(true);
     try {
+      // Push antes do pull: edição offline ainda no debounce (ou que falhou)
+      // seria sobrescrita pelo snapshot remoto sem aviso.
+      flushPendingPushes();
+      await pushUserSnapshot(userId, readLocalSnapshot(), true);
       const snapshot = await pullUserSnapshot(userId);
       applySnapshot(snapshot);
+      syncErrorNotifiedRef.current = false;
       captureEvent("sync refreshed from cloud");
+    } catch (err) {
+      notifySyncError(err);
     } finally {
+      refreshInFlightRef.current = false;
       setIsSyncing(false);
     }
-  }, [userId, applySnapshot]);
+  }, [
+    userId,
+    importPromptOpen,
+    flushPendingPushes,
+    applySnapshot,
+    notifySyncError,
+  ]);
+
+  useEffect(() => {
+    refreshFromCloudRef.current = refreshFromCloud;
+  }, [refreshFromCloud]);
 
   const resolveImport = useCallback(
     async (useLocalData: boolean) => {
@@ -193,11 +255,13 @@ export function SyncProvider({ children }: { children: ReactNode }) {
           await markLocalImportDone(userId);
           captureEvent("sync started fresh on cloud");
         }
+      } catch (err) {
+        notifySyncError(err);
       } finally {
         setIsSyncing(false);
       }
     },
-    [userId, applySnapshot],
+    [userId, applySnapshot, notifySyncError],
   );
 
   const schedulePush = useCallback(
@@ -208,10 +272,17 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       if (existing) clearTimeout(existing);
 
       pushTimersRef.current[key] = setTimeout(() => {
-        void fn();
+        delete pushTimersRef.current[key];
+        fn()
+          .then(() => {
+            syncErrorNotifiedRef.current = false;
+          })
+          .catch((err: unknown) => {
+            notifySyncError(err);
+          });
       }, PUSH_DEBOUNCE_MS);
     },
-    [userId],
+    [userId, notifySyncError],
   );
 
   const scheduleTasksPush = useCallback(
@@ -240,9 +311,14 @@ export function SyncProvider({ children }: { children: ReactNode }) {
       if (!userId || isApplyingRemoteRef.current) return;
       const existing = pushTimersRef.current.profile;
       if (existing) clearTimeout(existing);
-      await syncProfileToCloud(userId, profile);
+      try {
+        await syncProfileToCloud(userId, profile);
+        syncErrorNotifiedRef.current = false;
+      } catch (err) {
+        notifySyncError(err);
+      }
     },
-    [userId],
+    [userId, notifySyncError],
   );
 
   const schedulePreferencesPush = useCallback(
@@ -272,22 +348,28 @@ export function SyncProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (authLoading) {
-      setInitialSyncComplete(false);
+      markInitialSyncComplete(false);
       return;
     }
 
     if (!isAuthenticated || !userId) {
       initialSyncDoneRef.current = null;
       setImportPromptOpen(false);
-      setInitialSyncComplete(true);
+      markInitialSyncComplete(true);
       return;
     }
 
     if (initialSyncDoneRef.current === userId) return;
     initialSyncDoneRef.current = userId;
-    setInitialSyncComplete(false);
+    markInitialSyncComplete(false);
     void runInitialSync(userId);
-  }, [authLoading, isAuthenticated, userId, runInitialSync]);
+  }, [
+    authLoading,
+    isAuthenticated,
+    userId,
+    runInitialSync,
+    markInitialSyncComplete,
+  ]);
 
   useEffect(() => {
     if (!Capacitor.isNativePlatform() || !userId) return;

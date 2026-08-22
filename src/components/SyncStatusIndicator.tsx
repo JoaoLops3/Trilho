@@ -7,12 +7,12 @@ import { useAuth } from "../lib/auth-context";
 /**
  * Indicador discreto de status de sincronização.
  * Aparece temporariamente durante sync ativo ou quando offline.
- * 
+ *
  * Estados:
  * - Sincronizando: ícone de nuvem rotacionando
  * - Offline: ícone de nuvem desconectada (estático)
  * - Sincronizado: não exibe nada (ou exibe por 2s após sync)
- * 
+ *
  * Uso:
  * ```tsx
  * <SyncStatusIndicator />
@@ -51,17 +51,15 @@ export function SyncStatusIndicator() {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -10 }}
           className="fixed top-safe left-1/2 -translate-x-1/2 z-50 pointer-events-none"
+          role="status"
+          aria-live="polite"
         >
           <div
-            className="flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur-xl"
-            style={{
-              backgroundColor: showOffline
-                ? "rgba(251, 146, 60, 0.15)"
-                : "rgba(52, 211, 153, 0.15)",
-              border: showOffline
-                ? "1px solid rgba(251, 146, 60, 0.3)"
-                : "1px solid rgba(52, 211, 153, 0.3)",
-            }}
+            className={`flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-medium shadow-lg backdrop-blur-xl ${
+              showOffline
+                ? "bg-coral-400/15 border-coral-400/30"
+                : "bg-mint-400/15 border-mint-400/30"
+            }`}
           >
             {showOffline ? (
               <>
