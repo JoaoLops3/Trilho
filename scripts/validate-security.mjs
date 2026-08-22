@@ -140,7 +140,11 @@ describe("security — repo e CI", () => {
       "src/screens/NewPasswordScreen.tsx",
       "src/components/AuthScreenLayout.tsx",
     ]) {
-      assert.match(read(path), /auth-validation/, `${path} deve usar auth-validation`);
+      assert.match(
+        read(path),
+        /auth-validation/,
+        `${path} deve usar auth-validation`,
+      );
     }
   });
 });

@@ -79,3 +79,18 @@ O app id é `com.joaolops3.trilho`. Para deep links de auth no nativo:
 - [ ] Universal Links configurados no Xcode
 - [ ] Testar no **device**: cadastro → e-mail → confirmar → login
 - [ ] Testar no **device**: esqueci senha → Mail → app → nova senha → login
+
+## Deep link inválido ou expirado
+
+O app valida o formato do link **antes** de chamar `setSession` / `exchangeCodeForSession` (`parseAuthDeepLinkUrl` em `src/lib/auth-deeplink.ts`).
+
+Comportamento:
+
+1. URL malformada, tokens curtos ou par `access_token`/`refresh_token` incompleto → **rejeitado no client**.
+2. Troca de sessão falha (link expirado, OTP usado) → `invalidateAuthAfterFailedDeepLink()`:
+   - remove flag de recovery;
+   - `signOut({ scope: "local" })` — evita sessão “meio autenticada”;
+   - limpa hash/query na web (`clearAuthParamsFromUrl`).
+3. Usuário vê a tela **Link inválido ou expirado** em `/nova-senha` e pode solicitar novo e-mail.
+
+Teste manual: abrir link de recovery já usado no simulador → mensagem em PT + sem sessão pendurada.
