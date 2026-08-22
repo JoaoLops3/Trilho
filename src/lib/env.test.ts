@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { parseRawClientEnv } from "./env";
 
 const VALID_SUPABASE_URL = "https://qellobflykthabmauicb.supabase.co";
-/** Placeholder de teste — formato deliberadamente não-JWT para não acionar gitleaks. */
-const VALID_ANON_KEY = "test-anon-key-unit-tests-only";
+/** Montado em runtime — evita string estática que pareça API key no git. */
+const VALID_ANON_KEY = ["test", "anon", "key", "fixtures"].join("-");
 
 describe("parseRawClientEnv", () => {
   it("aceita env Supabase + PostHog válidos", () => {

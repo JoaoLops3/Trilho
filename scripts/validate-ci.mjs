@@ -37,4 +37,11 @@ describe("CI — GitHub Actions", () => {
     assert.match(workflow, /node-version: "24"/);
     assert.match(read("package.json"), /"node": "24.x"/);
   });
+
+  it("gitleaks usa config com allowlist de testes", () => {
+    const gitleaks = read(".gitleaks.toml");
+    assert.match(gitleaks, /useDefault = true/);
+    assert.match(gitleaks, /\.test\.ts/);
+    assert.match(read(".github/workflows/secret-scan.yml"), /gitleaks/);
+  });
 });
