@@ -1,5 +1,7 @@
 import type { Task } from "../types/task";
 
+import { taskSchema } from "./storage-schemas";
+import { parseStorageArray } from "./storage-runtime";
 import { STORAGE_KEYS } from "./storage-keys";
 
 const STORAGE_KEY = STORAGE_KEYS.tasks;
@@ -19,11 +21,15 @@ export function pruneCompletedTasks(tasks: Task[], now = new Date()): Task[] {
 
 export function loadTasks(): Task[] | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) return null;
-    const tasks = parsed as Task[];
+    const tasks = parseStorageArray(
+      localStorage.getItem(STORAGE_KEY),
+      taskSchema,
+      {
+        storageKey: STORAGE_KEY,
+        operation: "load_tasks",
+      },
+    );
+    if (!tasks) return null;
     const pruned = pruneCompletedTasks(tasks);
     if (pruned.length !== tasks.length) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(pruned));

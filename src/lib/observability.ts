@@ -7,7 +7,8 @@ export type ErrorSurface =
   | "auth"
   | "native"
   | "global"
-  | "async_action";
+  | "async_action"
+  | "storage";
 
 export interface ObservabilityContext {
   surface: ErrorSurface;

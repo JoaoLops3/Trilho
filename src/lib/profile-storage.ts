@@ -4,6 +4,8 @@ import {
   DEFAULT_DAILY_GOAL_MINUTES,
   LEGACY_DAILY_GOAL_MINUTES,
 } from "./daily-goal";
+import { userProfileSchema } from "./storage-schemas";
+import { parseStorageJson } from "./storage-runtime";
 import { STORAGE_KEYS } from "./storage-keys";
 
 const STORAGE_KEY = STORAGE_KEYS.profile;
@@ -22,7 +24,10 @@ const DEFAULT_PROFILE: UserProfile = {
 };
 
 function resolveDailyGoalMinutes(parsed: Record<string, unknown>): number {
-  if (typeof parsed.dailyGoalMinutes === "number" && parsed.dailyGoalMinutes > 0) {
+  if (
+    typeof parsed.dailyGoalMinutes === "number" &&
+    parsed.dailyGoalMinutes > 0
+  ) {
     return parsed.dailyGoalMinutes;
   }
   // Perfil local já existente antes da feature: mantém 5h.
@@ -83,10 +88,17 @@ function migrateLegacyProfile(parsed: Record<string, unknown>): UserProfile {
 
 export function loadProfile(): UserProfile {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { ...DEFAULT_PROFILE };
-    const parsed = JSON.parse(raw) as Record<string, unknown>;
-    return migrateLegacyProfile(parsed);
+    const parsed = parseStorageJson(localStorage.getItem(STORAGE_KEY));
+    if (parsed === null || parsed === undefined) {
+      return { ...DEFAULT_PROFILE };
+    }
+    if (typeof parsed !== "object" || parsed === null) {
+      return { ...DEFAULT_PROFILE };
+    }
+
+    const migrated = migrateLegacyProfile(parsed as Record<string, unknown>);
+    const validated = userProfileSchema.safeParse(migrated);
+    return validated.success ? validated.data : { ...DEFAULT_PROFILE };
   } catch {
     return { ...DEFAULT_PROFILE };
   }

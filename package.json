@@ -20,8 +20,9 @@
     "test:observability": "node --test scripts/validate-observability.mjs",
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
-    "test": "npm run test:unit && npm run test:sync && npm run test:auth && npm run test:rls && npm run test:tokens && npm run test:observability && npm run test:vitest && npm run test:ci",
+    "test": "npm run test:unit && npm run test:sync && npm run test:auth && npm run test:rls && npm run test:tokens && npm run test:observability && npm run test:vitest && npm run test:storage && npm run test:ci",
     "test:vitest": "node --test scripts/validate-vitest.mjs",
+    "test:storage": "node --test scripts/validate-storage-runtime.mjs",
     "test:ci": "node --test scripts/validate-ci.mjs",
     "cap:sync": "npm run build && npx cap sync ios",
     "cap:ios": "npm run cap:sync && npx cap open ios",
@@ -46,7 +47,8 @@
     "posthog-js": "^1.389.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-router-dom": "^5.3.4"
+    "react-router-dom": "^5.3.4",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.4.0",
