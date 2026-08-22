@@ -30,6 +30,7 @@ O app **sempre** grava local primeiro (cache offline). Quando autenticado, envia
 - Pull com erro lança exceção em vez de virar snapshot vazio (que apagaria o cache local no `applySnapshot`).
 - Push/pull falho mostra toast de erro com ação **Tentar novamente** (reexecuta o refresh). Um toast por falha; reseta em qualquer sync bem-sucedido. Erros também vão para o PostHog (`captureException`).
 - `SyncStatusIndicator` montado no app (junto do `ImportLocalDataSheet`): mostra "Sincronizando" durante sync ativo e "Offline" sem rede com sessão ativa.
+- Validação automatizada sem Vitest: `npm run test:sync` (checa ordem push→pull, asserts de erro, indicator montado e docs).
 
 ### Histórico diário (`day_history`)
 

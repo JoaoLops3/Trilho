@@ -1,4 +1,3 @@
-import type { PostgrestError } from "@supabase/supabase-js";
 import type { Task } from "../../components/TaskCard";
 import type { DayStat } from "../day-stats";
 import {
@@ -29,15 +28,7 @@ import {
 import type { Json, ProfileRow } from "../../types/database";
 import type { RoutineTemplate } from "../../types/routine";
 import type { UserDataSnapshot } from "./mappers";
-
-function assertNoSyncError(
-  error: PostgrestError | null,
-  context: string,
-): void {
-  if (error) {
-    throw new Error(`sync ${context}: ${error.message}`);
-  }
-}
+import { assertNoSyncError } from "./assert-no-sync-error";
 
 function mergePreferences(
   partial?: Partial<NotificationPreferences>,
