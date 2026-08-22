@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { DayDot } from "../lib/day-stats";
+import { themeColors } from "../lib/theme-colors";
 
 type StreakState = "on-time" | "delayed" | "stopped";
 
@@ -29,37 +30,43 @@ const STATE_COLORS: Record<
   }
 > = {
   "on-time": {
-    primary: "#1D9E75",
-    dark: "#085041",
-    mid: "#0F6E56",
-    light: "#9FE1CB",
+    primary: themeColors.mint[500],
+    dark: themeColors.mint[600],
+    mid: themeColors.mint[600],
+    light: themeColors.mint[300],
     label: "trem no horário",
     trackSpeed: "0.55s",
   },
   delayed: {
-    primary: "#BA7517",
-    dark: "#633806",
-    mid: "#854F0B",
-    light: "#FAC775",
+    primary: themeColors.coral[400],
+    dark: themeColors.coral[500],
+    mid: themeColors.coral[500],
+    light: themeColors.coral[300],
     label: "trem atrasado",
     trackSpeed: "0.9s",
   },
   stopped: {
-    primary: "#888780",
-    dark: "#444441",
-    mid: "#5F5E5A",
-    light: "#D3D1C7",
+    primary: themeColors.obsidian[500],
+    dark: themeColors.obsidian[700],
+    mid: themeColors.obsidian[600],
+    light: themeColors.obsidian[300],
     label: "o trem voltou aos trilhos",
     trackSpeed: "0s",
   },
 };
 
 const DOT_COLORS: Record<DayDot["status"], { bg: string; outline?: string }> = {
-  full: { bg: "#1D9E75" },
-  partial: { bg: "#BA7517" },
+  full: { bg: themeColors.mint[500] },
+  partial: { bg: themeColors.coral[400] },
   empty: { bg: "transparent" },
-  "today-full": { bg: "#1D9E75", outline: "#1D9E75" },
-  "today-partial": { bg: "#BA7517", outline: "#BA7517" },
+  "today-full": {
+    bg: themeColors.mint[500],
+    outline: themeColors.mint[500],
+  },
+  "today-partial": {
+    bg: themeColors.coral[400],
+    outline: themeColors.coral[400],
+  },
 };
 
 function TrainSVG({
@@ -187,7 +194,7 @@ function TrainSVG({
       viewBox="0 -24 320 92"
       role="img"
       aria-label="Ilustração do trem representando a sequência"
-      style={{ display: "block", overflow: "visible" }}
+      className="block overflow-visible"
     >
       <defs>
         <clipPath id="trilho-clip">
@@ -301,66 +308,28 @@ export function TrainStreakCard({
     recordDays > 0 ? Math.min(100, (streakDays / recordDays) * 100) : 0;
 
   return (
-    <div
-      style={{
-        backgroundColor: "#1e1e1e",
-        borderRadius: 16,
-        border: "0.5px solid #333",
-        padding: "1rem 1.25rem",
-      }}
-    >
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-        }}
-      >
+    <div className="card-premium px-5 py-4">
+      <div className="flex items-start justify-between">
         <div>
-          <p
-            style={{
-              fontSize: 11,
-              color: "#888",
-              letterSpacing: "0.06em",
-              textTransform: "uppercase",
-              margin: "0 0 4px",
-            }}
-          >
+          <p className="m-0 mb-1 text-xs uppercase tracking-wider text-obsidian-400">
             Sequência
           </p>
-          <p
-            style={{
-              fontSize: 28,
-              fontWeight: 500,
-              color: "#fff",
-              margin: 0,
-              lineHeight: 1.1,
-            }}
-          >
+          <p className="m-0 text-3xl font-medium leading-tight text-obsidian-50">
             {streakDays} {streakDays === 1 ? "dia" : "dias"}
           </p>
-          <p style={{ fontSize: 13, color: colors.mid, margin: "4px 0 0" }}>
+          <p className="m-0 mt-1 text-sm" style={{ color: colors.mid }}>
             {colors.label}
           </p>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <p style={{ fontSize: 11, color: "#888", margin: "0 0 2px" }}>
-            recorde
-          </p>
-          <p
-            style={{
-              fontSize: 18,
-              fontWeight: 500,
-              color: "#888",
-              margin: 0,
-            }}
-          >
+        <div className="text-right">
+          <p className="m-0 mb-0.5 text-xs text-obsidian-400">recorde</p>
+          <p className="m-0 text-lg font-medium text-obsidian-400">
             {recordDays} dias
           </p>
         </div>
       </div>
 
-      <div style={{ margin: "12px 0 6px", overflow: "visible" }}>
+      <div className="my-3 overflow-visible">
         <TrainSVG
           colors={colors}
           animate={state !== "stopped"}
@@ -368,49 +337,31 @@ export function TrainStreakCard({
         />
       </div>
 
-      <div
-        style={{
-          display: "flex",
-          gap: 6,
-          alignItems: "center",
-          marginTop: 10,
-        }}
-      >
+      <div className="mt-2.5 flex items-center gap-1.5">
         {dots.map((dot, i) => {
           const c = DOT_COLORS[dot.status];
           return (
             <div
               key={i}
+              className={`h-6 w-6 rounded-full ${
+                dot.status === "empty" ? "border border-obsidian-600" : ""
+              }`}
               style={{
-                width: 24,
-                height: 24,
-                borderRadius: "50%",
                 backgroundColor: c.bg,
-                border: dot.status === "empty" ? "0.5px solid #555" : "none",
-                outline: c.outline ? `2.5px solid ${c.outline}` : "none",
-                outlineOffset: c.outline ? 2 : 0,
+                outline: c.outline ? `2.5px solid ${c.outline}` : undefined,
+                outlineOffset: c.outline ? 2 : undefined,
               }}
             />
           );
         })}
       </div>
 
-      <div
-        style={{
-          height: 5,
-          borderRadius: 3,
-          backgroundColor: "#111",
-          marginTop: 8,
-          overflow: "hidden",
-        }}
-      >
+      <div className="mt-2 h-1.5 overflow-hidden rounded-sm bg-surface-primary">
         <div
+          className="h-full rounded-sm transition-[width] duration-500 ease-out"
           style={{
-            height: "100%",
             width: `${pct}%`,
-            borderRadius: 3,
             backgroundColor: colors.primary,
-            transition: "width 0.6s ease",
           }}
         />
       </div>
