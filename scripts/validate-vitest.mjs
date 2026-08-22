@@ -19,8 +19,12 @@ const DOMAIN_TEST_FILES = [
   "src/lib/day-rollover.test.ts",
   "src/lib/routine-generator.test.ts",
   "src/lib/daily-goal.test.ts",
+  "src/lib/auth-errors.test.ts",
+  "src/lib/week-utils.test.ts",
+  "src/lib/task-duration.test.ts",
   "src/lib/sync/mappers.test.ts",
   "src/lib/sync/assert-no-sync-error.test.ts",
+  "src/lib/sync/cloud-sync.test.ts",
 ];
 
 describe("vitest — bootstrap", () => {
@@ -65,5 +69,15 @@ describe("routine-generator — cobre dedup e limpeza", () => {
   it("testa generateRoutineInstances", () => {
     assert.match(src, /generateRoutineInstances/);
     assert.match(src, /preserva concluídas/);
+  });
+});
+
+describe("cloud-sync — mock Supabase", () => {
+  const src = read("src/lib/sync/cloud-sync.test.ts");
+
+  it("testa syncTasksToCloud e pullUserSnapshot", () => {
+    assert.match(src, /syncTasksToCloud/);
+    assert.match(src, /pullUserSnapshot/);
+    assert.match(src, /getSupabase/);
   });
 });

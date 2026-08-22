@@ -7,19 +7,18 @@ type QueryResult = {
   count?: number | null;
 };
 
+type TableHandler = {
+  upsert?: QueryResult | (() => QueryResult | Promise<QueryResult>);
+  select?: QueryResult | (() => QueryResult | Promise<QueryResult>);
+  delete?: QueryResult | (() => QueryResult | Promise<QueryResult>);
+  update?: QueryResult | (() => QueryResult | Promise<QueryResult>);
+};
+
 /** Mock enxuto do client Supabase para testes de cloud-sync. */
 export function createSupabaseMock(
-  tableHandlers: Record<
-    string,
-    {
-      upsert?: QueryResult | (() => QueryResult | Promise<QueryResult>);
-      select?: QueryResult | (() => QueryResult | Promise<QueryResult>);
-      delete?: QueryResult | (() => QueryResult | Promise<QueryResult>);
-      update?: QueryResult | (() => QueryResult | Promise<QueryResult>);
-    }
-  >,
+  tableHandlers: Record<string, TableHandler>,
 ) {
-  const calls: { table: string; op: string; args: unknown[] }[] = [];
+  const calls: { table: string; op: string; payload?: unknown }[] = [];
 
   const resolve = (
     value: QueryResult | (() => QueryResult | Promise<QueryResult>),
@@ -27,59 +26,53 @@ export function createSupabaseMock(
 
   const from = vi.fn((table: string) => {
     const handler = tableHandlers[table] ?? {};
+    let afterSelect = false;
+    let afterUpdate = false;
 
     const chain = {
-      select: vi.fn((...args: unknown[]) => {
-        calls.push({ table, op: "select", args });
+      select: vi.fn((payload?: unknown) => {
+        calls.push({ table, op: "select", payload });
+        afterSelect = true;
         return chain;
       }),
-      eq: vi.fn((...args: unknown[]) => {
-        calls.push({ table, op: "eq", args });
+      eq: vi.fn(async (payload?: unknown) => {
+        calls.push({ table, op: "eq", payload });
+        if (afterSelect) {
+          afterSelect = false;
+          return resolve(handler.select ?? { data: [], error: null });
+        }
+        if (afterUpdate) {
+          afterUpdate = false;
+          return resolve(handler.update ?? { error: null });
+        }
         return chain;
       }),
-      order: vi.fn((...args: unknown[]) => {
-        calls.push({ table, op: "order", args });
-        return chain;
-      }),
-      limit: vi.fn(async (...args: unknown[]) => {
-        calls.push({ table, op: "limit", args });
-        return resolve(handler.select ?? { data: [], error: null });
-      }),
-      upsert: vi.fn(async (...args: unknown[]) => {
-        calls.push({ table, op: "upsert", args });
+      upsert: vi.fn(async (payload?: unknown) => {
+        calls.push({ table, op: "upsert", payload });
         return resolve(handler.upsert ?? { error: null });
       }),
-      delete: vi.fn((...args: unknown[]) => {
-        calls.push({ table, op: "delete", args });
+      delete: vi.fn(() => {
+        calls.push({ table, op: "delete" });
+        return {
+          in: vi.fn(async (payload?: unknown) => {
+            calls.push({ table, op: "delete.in", payload });
+            return resolve(handler.delete ?? { error: null });
+          }),
+        };
+      }),
+      update: vi.fn((payload?: unknown) => {
+        calls.push({ table, op: "update", payload });
+        afterUpdate = true;
         return chain;
       }),
-      in: vi.fn(async (...args: unknown[]) => {
-        calls.push({ table, op: "in", args });
-        return resolve(handler.delete ?? { error: null });
-      }),
-      update: vi.fn((...args: unknown[]) => {
-        calls.push({ table, op: "update", args });
-        return chain;
-      }),
-      maybeSingle: vi.fn(async (...args: unknown[]) => {
-        calls.push({ table, op: "maybeSingle", args });
-        return resolve(handler.select ?? { data: null, error: null });
-      }),
-      then: undefined as unknown,
+      order: vi.fn(() => chain),
+      limit: vi.fn(async () =>
+        resolve(handler.select ?? { data: [], error: null }),
+      ),
+      maybeSingle: vi.fn(async () =>
+        resolve(handler.select ?? { data: null, error: null }),
+      ),
     };
-
-    // select().eq() termina com Promise (PostgREST head/count ou select normal)
-    chain.eq.mockImplementation((...args: unknown[]) => {
-      calls.push({ table, op: "eq", args });
-      const lastOp = calls.at(-2)?.op;
-      if (lastOp === "select") {
-        return resolve(handler.select ?? { data: [], error: null });
-      }
-      if (lastOp === "update") {
-        return resolve(handler.update ?? { error: null });
-      }
-      return chain;
-    });
 
     return chain;
   });
@@ -87,10 +80,7 @@ export function createSupabaseMock(
   return { client: { from }, calls };
 }
 
-export function authError(
-  message: string,
-  code?: string,
-): PostgrestError {
+export function authError(message: string, code?: string): PostgrestError {
   return {
     message,
     code: code ?? "PGRST",
