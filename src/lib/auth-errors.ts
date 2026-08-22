@@ -2,6 +2,10 @@ import type { AuthError } from "@supabase/supabase-js";
 
 import { PROFILE_HEADER_NAME_MAX_LENGTH } from "./profile-storage";
 
+/** Mensagem genérica — nunca devolver `error.message` cru do GoTrue ao usuário. */
+const GENERIC_AUTH_ERROR =
+  "Não foi possível concluir. Tente novamente.";
+
 const MESSAGES: Record<string, string> = {
   invalid_credentials: "E-mail ou senha incorretos.",
   email_not_confirmed:
@@ -12,34 +16,73 @@ const MESSAGES: Record<string, string> = {
   signup_disabled: "Cadastro temporariamente indisponível.",
   over_request_rate_limit:
     "Muitas tentativas. Aguarde um momento e tente de novo.",
+  same_password: "A nova senha deve ser diferente da atual.",
+  session_expired:
+    "Sessão expirada. Solicite um novo link de recuperação.",
 };
 
+/** Códigos estáveis do GoTrue (`AuthError.code`) quando presentes. */
+const BY_CODE: Record<string, string> = {
+  invalid_credentials: MESSAGES.invalid_credentials,
+  email_not_confirmed: MESSAGES.email_not_confirmed,
+  user_already_exists: MESSAGES.user_already_registered,
+  user_already_registered: MESSAGES.user_already_registered,
+  weak_password: MESSAGES.weak_password,
+  validation_failed: MESSAGES.invalid_email,
+  signup_disabled: MESSAGES.signup_disabled,
+  over_request_rate_limit: MESSAGES.over_request_rate_limit,
+  over_email_send_rate_limit: MESSAGES.over_request_rate_limit,
+  same_password: MESSAGES.same_password,
+  otp_expired: MESSAGES.session_expired,
+  flow_state_expired: MESSAGES.session_expired,
+};
+
+/**
+ * Traduz erros de Auth do Supabase para copy em PT-BR.
+ * Em caso desconhecido, devolve mensagem genérica — nunca o texto cru do servidor.
+ */
 export function mapAuthError(error: AuthError | null): string | null {
   if (!error) return null;
 
-  if (error.message.includes("Invalid login credentials")) {
-    return MESSAGES.invalid_credentials;
-  }
-  if (error.message.includes("Email not confirmed")) {
-    return MESSAGES.email_not_confirmed;
-  }
-  if (error.message.includes("User already registered")) {
-    return MESSAGES.user_already_registered;
-  }
-  if (error.message.includes("Password should be at least")) {
-    return MESSAGES.weak_password;
-  }
-  if (error.message.includes("Unable to validate email")) {
-    return MESSAGES.invalid_email;
-  }
-  if (error.message.includes("Signups not allowed")) {
-    return MESSAGES.signup_disabled;
-  }
-  if (error.message.includes("rate limit")) {
-    return MESSAGES.over_request_rate_limit;
+  const code = error.code?.trim().toLowerCase();
+  if (code && BY_CODE[code]) {
+    return BY_CODE[code];
   }
 
-  return error.message || "Não foi possível concluir. Tente novamente.";
+  const message = error.message ?? "";
+
+  if (message.includes("Invalid login credentials")) {
+    return MESSAGES.invalid_credentials;
+  }
+  if (message.includes("Email not confirmed")) {
+    return MESSAGES.email_not_confirmed;
+  }
+  if (message.includes("User already registered")) {
+    return MESSAGES.user_already_registered;
+  }
+  if (message.includes("Password should be at least")) {
+    return MESSAGES.weak_password;
+  }
+  if (message.includes("Unable to validate email")) {
+    return MESSAGES.invalid_email;
+  }
+  if (message.includes("Signups not allowed")) {
+    return MESSAGES.signup_disabled;
+  }
+  if (message.toLowerCase().includes("rate limit")) {
+    return MESSAGES.over_request_rate_limit;
+  }
+  if (message.toLowerCase().includes("same password")) {
+    return MESSAGES.same_password;
+  }
+  if (
+    message.toLowerCase().includes("expired") ||
+    message.toLowerCase().includes("otp")
+  ) {
+    return MESSAGES.session_expired;
+  }
+
+  return GENERIC_AUTH_ERROR;
 }
 
 export function validateEmail(email: string): string | null {
