@@ -91,7 +91,7 @@ function RoutineRow({
           }`}
         >
           <Trash2 className="h-4 w-4" strokeWidth={2} />
-          {confirmingDelete ? "Confirmar" : "Excluir"}
+          {confirmingDelete ? "Excluir rotina" : "Excluir"}
         </button>
       </div>
     </div>

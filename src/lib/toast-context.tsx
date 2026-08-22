@@ -137,7 +137,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
  * // Toasts simples
  * toast.success('Tarefa salva!');
  * toast.error('Falha ao salvar');
- * toast.info('Sincronizando...');
+ * toast.info('Sincronizando…');
  * toast.warning('Dados não salvos');
  * 
  * // Toast com mensagem adicional
@@ -154,7 +154,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
  * });
  * 
  * // Dismissar manualmente
- * const id = toast.success('Salvando...');
+ * const id = toast.success('Salvando…');
  * setTimeout(() => toast.dismissToast(id), 2000);
  * ```
  */
@@ -179,7 +179,7 @@ export function useToast(): ToastContextValue {
  *     await api.saveTask(task);
  *   },
  *   {
- *     loading: 'Salvando tarefa...',
+ *     loading: 'Salvando tarefa…',
  *     success: 'Tarefa salva com sucesso!',
  *     error: 'Falha ao salvar tarefa',
  *   }

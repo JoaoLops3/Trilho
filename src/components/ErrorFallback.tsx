@@ -1,6 +1,7 @@
 import { IonPage, IonContent } from "@ionic/react";
 import { AlertCircle, RefreshCcw, Home } from "lucide-react";
 import { useHistory } from "react-router-dom";
+import { SUPPORT_EMAIL } from "../lib/app-brand";
 import { motion } from "../lib/motion";
 
 interface ErrorFallbackProps {
@@ -145,7 +146,7 @@ export function ErrorFallback({ error, onReset, context }: ErrorFallbackProps) {
             <p className="mt-6 text-center text-sm text-obsidian-500">
               Se o problema persistir, entre em contato pelo{" "}
               <a
-                href="mailto:support@example.com"
+                href={`mailto:${SUPPORT_EMAIL}`}
                 className="text-mint-400 hover:underline"
               >
                 suporte

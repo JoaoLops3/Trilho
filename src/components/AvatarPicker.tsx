@@ -128,7 +128,7 @@ export function AvatarPicker({
           disabled={!selectedSeed || isSaving}
           className={`${actionButtonClass} btn-primary !px-4 !py-0 border-transparent disabled:cursor-not-allowed disabled:opacity-40`}
         >
-          {isSaving ? "Salvando..." : "Confirmar"}
+          {isSaving ? "Salvando…" : "Confirmar"}
         </button>
       </div>
     </div>
