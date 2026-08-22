@@ -6,6 +6,8 @@ import { HeaderBar } from "../components/HeaderBar";
 import { TaskCard } from "../components/TaskCard";
 import { ProgressRing } from "../components/ProgressRing";
 import { OrbBackground } from "../components/OrbBackground";
+import { SectionRailHeading } from "../components/RailMark";
+import { TrilhoEmptyState } from "../components/TrilhoEmptyState";
 import { captureEvent } from "../lib/posthog";
 import {
   computeFocusSeconds,
@@ -165,7 +167,7 @@ export function DashboardScreen() {
                           className="h-2.5 w-2.5 rounded-full bg-mint-400"
                         />
                         <span className="text-[11px] font-semibold uppercase tracking-wider text-mint-400">
-                          Em Andamento
+                          No trilho
                         </span>
                       </div>
                       <h2 className="mb-1 truncate font-display text-lg font-semibold text-white">
@@ -204,14 +206,10 @@ export function DashboardScreen() {
               transition={{ delay: 0.1 }}
               className="shrink-0"
             >
-              <div className="mb-2 flex items-center justify-between px-1">
-                <h2 className="font-display text-base font-semibold text-white">
-                  Próximas
-                </h2>
-                <span className="text-sm text-obsidian-500">
-                  {upcomingTasks.length} tarefas
-                </span>
-              </div>
+              <SectionRailHeading
+                title="Próximas partidas"
+                meta={`${upcomingTasks.length} tarefas`}
+              />
 
               {visibleUpcoming.length > 0 ? (
                 <div className="space-y-2">
@@ -220,14 +218,10 @@ export function DashboardScreen() {
                   )}
                 </div>
               ) : (
-                <div className="card-glass flex flex-col items-center justify-center px-6 py-6 text-center">
-                  <p className="font-display text-base font-medium text-white">
-                    Nenhuma tarefa no momento
-                  </p>
-                  <p className="mt-1 text-sm text-obsidian-500">
-                    Toque no + para criar sua primeira tarefa.
-                  </p>
-                </div>
+                <TrilhoEmptyState
+                  title="Trilho livre por agora"
+                  description="Toque no + para a próxima partida do dia."
+                />
               )}
 
               <button
@@ -235,7 +229,7 @@ export function DashboardScreen() {
                 onClick={handleViewAllTasks}
                 className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.04] py-2.5 text-sm font-medium text-mint-400 transition-colors hover:bg-white/[0.08] touch-manipulation"
               >
-                Ver todas
+                Ver agenda completa
               </button>
             </motion.section>
           </div>

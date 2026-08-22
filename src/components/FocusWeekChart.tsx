@@ -1,5 +1,6 @@
 import { motion } from "../lib/motion";
 import { dayKey, type DayStat } from "../lib/day-stats";
+import { RailMark } from "./RailMark";
 
 const WEEKDAY_LABELS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 const BAR_AREA_HEIGHT_PX = 72;
@@ -100,7 +101,7 @@ export function FocusWeekChart({
               className="flex flex-1 flex-col items-center gap-1.5"
             >
               <div
-                className="flex w-full items-end justify-center"
+                className="relative flex w-full items-end justify-center"
                 style={{ height: BAR_AREA_HEIGHT_PX }}
               >
                 {hasFocus && (
@@ -108,7 +109,7 @@ export function FocusWeekChart({
                     initial={{ height: 0 }}
                     animate={{ height: barHeightPx }}
                     transition={{ duration: 0.6, ease: "easeOut" }}
-                    className={`w-full max-w-[24px] rounded-t-lg ${
+                    className={`relative z-10 w-full max-w-[24px] rounded-t-lg ${
                       isToday
                         ? "bg-gradient-to-t from-mint-500 to-mint-400"
                         : "bg-white/10"
@@ -117,6 +118,12 @@ export function FocusWeekChart({
                   />
                 )}
               </div>
+              <span
+                className={`h-1.5 w-1.5 rounded-full ${
+                  isToday ? "bg-mint-400" : "bg-obsidian-600"
+                }`}
+                aria-hidden
+              />
               <span
                 className={`text-[10px] uppercase tracking-wide ${
                   isToday ? "text-mint-400" : "text-obsidian-500"
@@ -128,6 +135,8 @@ export function FocusWeekChart({
           );
         })}
       </div>
+
+      <RailMark className="mt-1" tone="muted" sleeperCount={11} />
 
       <ChartLegend />
 

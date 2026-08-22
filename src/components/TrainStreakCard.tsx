@@ -312,7 +312,7 @@ export function TrainStreakCard({
       <div className="flex items-start justify-between">
         <div>
           <p className="m-0 mb-1 text-xs uppercase tracking-wider text-obsidian-400">
-            Sequência
+            Sequência no trilho
           </p>
           <p className="m-0 text-3xl font-medium leading-tight text-obsidian-50">
             {streakDays} {streakDays === 1 ? "dia" : "dias"}

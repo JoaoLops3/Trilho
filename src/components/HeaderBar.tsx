@@ -3,6 +3,7 @@ import { Bell } from "lucide-react";
 import { useHistory } from "react-router-dom";
 import { useNotifications } from "../lib/notifications-context";
 import { tabNavigationState } from "../lib/tab-navigation";
+import { APP_TAGLINE } from "../lib/app-brand";
 import { Avatar } from "./Avatar";
 import type { AvatarStyle } from "../types/avatar";
 
@@ -29,13 +30,13 @@ export function HeaderBar({
       transition={{ duration: 0.4, ease: [0.25, 0.46, 0.45, 0.94] }}
       className="flex items-center justify-between px-4 pt-safe pb-2"
     >
-      <div className="flex items-center gap-3">
+      <div className="flex min-w-0 items-center gap-3">
         <motion.button
           type="button"
           onClick={() => history.push("/perfil")}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="relative touch-manipulation"
+          className="relative shrink-0 touch-manipulation"
           aria-label="Abrir perfil"
         >
           <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-mint-400 to-electric-500 p-0.5 shadow-glow-mint-sm">
@@ -57,17 +58,20 @@ export function HeaderBar({
           <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-mint-400 border-[2px] border-surface-primary" />
         </motion.button>
 
-        <div className="flex flex-col justify-center gap-0.5 pt-0.5">
+        <div className="flex min-w-0 flex-col justify-center gap-0.5 pt-0.5">
           <p className="m-0 text-xs text-obsidian-500 font-medium tracking-wide uppercase leading-none">
             {greeting}
           </p>
-          <h1 className="m-0 font-display font-semibold text-lg text-white tracking-tight leading-tight">
+          <h1 className="m-0 truncate font-display font-semibold text-lg text-white tracking-tight leading-tight">
             {userName}
           </h1>
+          <p className="m-0 mt-0.5 truncate text-[10px] text-obsidian-500 leading-none">
+            {APP_TAGLINE}
+          </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex shrink-0 items-center gap-2">
         <motion.button
           type="button"
           onClick={() =>
