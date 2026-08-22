@@ -305,7 +305,7 @@ export const TaskCard = memo(
                           className="flex w-full items-center gap-3 px-4 py-3 text-sm font-semibold text-coral-400 bg-coral-500/10 hover:bg-coral-500/20 transition-colors touch-manipulation"
                         >
                           <Trash2 className="w-4 h-4" strokeWidth={2} />
-                          Confirmar exclusão
+                          Excluir tarefa
                         </button>
                       ) : (
                         <button
