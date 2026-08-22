@@ -10,7 +10,7 @@ import {
 } from "react";
 import { App as CapApp } from "@capacitor/app";
 import { Capacitor } from "@capacitor/core";
-import type { Task, TaskStatus } from "../components/TaskCard";
+import type { Task, TaskStatus } from "../types/task";
 import { loadTasks, saveTasks } from "./storage";
 import {
   computeFocusSeconds,

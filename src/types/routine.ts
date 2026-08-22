@@ -1,4 +1,4 @@
-import type { TaskPriority } from "../components/TaskCard";
+import type { TaskPriority } from "./task";
 
 /** Template de rotina recorrente: gera instâncias de Task nos dias configurados. */
 export interface RoutineTemplate {

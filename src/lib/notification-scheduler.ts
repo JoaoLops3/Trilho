@@ -1,4 +1,4 @@
-import type { Task } from "../components/TaskCard";
+import type { Task } from "../types/task";
 import { dayKey } from "./day-stats";
 import type { LeadMinutes } from "./notification-preferences";
 import { taskDay } from "./week-utils";
