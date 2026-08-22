@@ -29,6 +29,7 @@ const DOMAIN_TEST_FILES = [
   "src/lib/sync/assert-no-sync-error.test.ts",
   "src/lib/sync/cloud-sync.test.ts",
   "src/lib/storage-runtime.test.ts",
+  "src/lib/env.test.ts",
 ];
 
 describe("vitest — bootstrap", () => {

@@ -33,8 +33,15 @@ describe("CI — GitHub Actions", () => {
     assert.match(workflow, /npm run build/);
   });
 
-  it("usa Node 20 alinhado ao engines", () => {
-    assert.match(workflow, /node-version: "20"/);
-    assert.match(read("package.json"), /"node": "20.x"/);
+  it("usa Node 24 alinhado ao engines", () => {
+    assert.match(workflow, /node-version: "24"/);
+    assert.match(read("package.json"), /"node": "24.x"/);
+  });
+
+  it("gitleaks usa config com allowlist de testes", () => {
+    const gitleaks = read(".gitleaks.toml");
+    assert.match(gitleaks, /useDefault = true/);
+    assert.match(gitleaks, /\.test\.ts/);
+    assert.match(read(".github/workflows/secret-scan.yml"), /gitleaks/);
   });
 });

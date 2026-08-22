@@ -1,10 +1,11 @@
 import posthog from "posthog-js";
 import { Capacitor } from "@capacitor/core";
+import { clientEnv } from "./env";
 import { getRuntimeContext } from "./runtime-context";
 import { STORAGE_KEYS } from "./storage-keys";
 
-const apiKey = import.meta.env.VITE_POSTHOG_KEY as string | undefined;
-const apiHost = import.meta.env.VITE_POSTHOG_HOST as string | undefined;
+const apiKey = clientEnv.posthogKey;
+const apiHost = clientEnv.posthogHost;
 
 type EventProperties = Record<
   string,

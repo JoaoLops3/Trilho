@@ -1,0 +1,14 @@
+# Config local do gitleaks — estende regras default com allowlist de fixtures de teste.
+# Fixtures em *.test.ts não são segredos reais (ver src/lib/env.test.ts).
+
+title = "Trilho"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Arquivos de teste com placeholders — nunca segredos de produção"
+paths = [
+  '''(?i).*\.test\.ts$''',
+  '''(?i).*\.test\.tsx$''',
+]
