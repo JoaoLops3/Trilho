@@ -9,8 +9,7 @@ import { fileURLToPath } from "node:url";
 import { describe, it } from "node:test";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "..");
-const migrationPath =
-  "supabase/migrations/20260822142153_rls_initplan.sql";
+const migrationPath = "supabase/migrations/20260822142153_rls_initplan.sql";
 
 function read(rel) {
   return readFileSync(join(root, rel), "utf8");
@@ -42,9 +41,7 @@ describe("rls initplan migration", () => {
       .split("\n")
       .filter((line) => !line.trim().startsWith("--"))
       .filter(
-        (line) =>
-          /using\s*\(/i.test(line) ||
-          /with check\s*\(/i.test(line),
+        (line) => /using\s*\(/i.test(line) || /with check\s*\(/i.test(line),
       );
     for (const line of lines) {
       assert.doesNotMatch(

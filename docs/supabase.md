@@ -28,12 +28,12 @@ flowchart TB
   GoTrue -->|trigger on signup| DB
 ```
 
-| Modo | Comportamento |
-|------|---------------|
-| Guest | Só `localStorage` |
-| Logado | Cache local + sync debounced (~800 ms) para Postgres |
-| 1º login com dados locais | Sheet: importar ou começar do zero |
-| Outro aparelho | Pull da nuvem substitui cache |
+| Modo                      | Comportamento                                        |
+| ------------------------- | ---------------------------------------------------- |
+| Guest                     | Só `localStorage`                                    |
+| Logado                    | Cache local + sync debounced (~800 ms) para Postgres |
+| 1º login com dados locais | Sheet: importar ou começar do zero                   |
+| Outro aparelho            | Pull da nuvem substitui cache                        |
 
 Detalhes de conflito/offline: [`docs/sync-behavior.md`](./sync-behavior.md)
 
@@ -41,13 +41,13 @@ Detalhes de conflito/offline: [`docs/sync-behavior.md`](./sync-behavior.md)
 
 ## Mapeamento app → banco
 
-| localStorage / app | Tabela Postgres | Ownership |
-|--------------------|-----------------|-----------|
-| `trilho:tasks` | `public.tasks` | `user_id = auth.uid()` |
-| `trilho:history` | `public.day_history` | PK `(user_id, date)` |
-| `trilho:profile` | `public.profiles` | `id = auth.uid()` |
+| localStorage / app                | Tabela Postgres                   | Ownership              |
+| --------------------------------- | --------------------------------- | ---------------------- |
+| `trilho:tasks`                    | `public.tasks`                    | `user_id = auth.uid()` |
+| `trilho:history`                  | `public.day_history`              | PK `(user_id, date)`   |
+| `trilho:profile`                  | `public.profiles`                 | `id = auth.uid()`      |
 | `trilho:notification-preferences` | `public.notification_preferences` | `user_id = auth.uid()` |
-| `trilho:notifications` | `public.notifications` | `user_id = auth.uid()` |
+| `trilho:notifications`            | `public.notifications`            | `user_id = auth.uid()` |
 
 ### Enums (espelham TypeScript)
 
@@ -57,23 +57,23 @@ Detalhes de conflito/offline: [`docs/sync-behavior.md`](./sync-behavior.md)
 
 ### Triggers
 
-| Trigger | Função | Quando |
-|---------|--------|--------|
+| Trigger                | Função              | Quando                                                |
+| ---------------------- | ------------------- | ----------------------------------------------------- |
 | `on_auth_user_created` | `handle_new_user()` | Signup → cria `profiles` + `notification_preferences` |
-| `*_set_updated_at` | `set_updated_at()` | UPDATE em profiles, tasks, notification_preferences |
+| `*_set_updated_at`     | `set_updated_at()`  | UPDATE em profiles, tasks, notification_preferences   |
 
 ---
 
 ## Migrations (ordem)
 
-| Arquivo | Conteúdo |
-|---------|----------|
-| `20260627173457_initial_schema.sql` | Enums, tabelas, índices, RLS, grants |
-| `20260627173903_harden_function_security.sql` | `search_path` em `set_updated_at`, revoke EXECUTE em `handle_new_user` |
-| `20260627173929_revoke_rls_auto_enable_rpc.sql` | Revoke EXECUTE em `rls_auto_enable` |
-| `20260627183639_delete_own_account.sql` | Função `delete_own_account` (LGPD) |
-| `20260627203026_signup_display_name.sql` | `handle_new_user` com `display_name` do signup |
-| `20260628022742_profile_nickname.sql` | Coluna `nickname` separada de `display_name` |
+| Arquivo                                         | Conteúdo                                                               |
+| ----------------------------------------------- | ---------------------------------------------------------------------- |
+| `20260627173457_initial_schema.sql`             | Enums, tabelas, índices, RLS, grants                                   |
+| `20260627173903_harden_function_security.sql`   | `search_path` em `set_updated_at`, revoke EXECUTE em `handle_new_user` |
+| `20260627173929_revoke_rls_auto_enable_rpc.sql` | Revoke EXECUTE em `rls_auto_enable`                                    |
+| `20260627183639_delete_own_account.sql`         | Função `delete_own_account` (LGPD)                                     |
+| `20260627203026_signup_display_name.sql`        | `handle_new_user` com `display_name` do signup                         |
+| `20260628022742_profile_nickname.sql`           | Coluna `nickname` separada de `display_name`                           |
 
 Os version IDs devem coincidir com `supabase_migrations.schema_migrations` no remoto — necessário para o check **Supabase Preview** no GitHub.
 
@@ -123,14 +123,14 @@ supabase db reset
 
 ## Código relevante
 
-| Arquivo | Papel |
-|---------|-------|
-| `src/lib/supabase.ts` | Client tipado (`Database`) |
-| `src/types/database.ts` | Tipos Postgres |
-| `src/lib/auth-context.tsx` | Sessão Supabase Auth |
-| `src/lib/sync-context.tsx` | Orquestra pull/push |
-| `src/lib/sync/cloud-sync.ts` | CRUD na nuvem |
-| `supabase/migrations/` | Schema versionado |
+| Arquivo                      | Papel                      |
+| ---------------------------- | -------------------------- |
+| `src/lib/supabase.ts`        | Client tipado (`Database`) |
+| `src/types/database.ts`      | Tipos Postgres             |
+| `src/lib/auth-context.tsx`   | Sessão Supabase Auth       |
+| `src/lib/sync-context.tsx`   | Orquestra pull/push        |
+| `src/lib/sync/cloud-sync.ts` | CRUD na nuvem              |
+| `supabase/migrations/`       | Schema versionado          |
 
 Regenerar tipos (quando schema mudar):
 
