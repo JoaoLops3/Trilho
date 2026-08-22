@@ -144,7 +144,10 @@ export function NewPasswordScreen() {
         <button
           type="button"
           onClick={() => {
-            void signOut().then(() => history.replace("/login"));
+            void signOut().then(() => {
+              history.replace("/login");
+              window.location.reload();
+            });
           }}
           className="w-full text-center text-sm text-obsidian-500 hover:text-obsidian-300 transition-colors touch-manipulation py-2"
         >
