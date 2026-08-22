@@ -73,7 +73,7 @@ export function StatsScreen() {
               Estatísticas
             </h1>
             <p className="text-obsidian-500 text-sm mt-1">
-              Seu progresso de hoje e dos últimos dias.
+              Seu progresso no trilho — hoje e nos últimos dias.
             </p>
           </motion.div>
 
@@ -127,7 +127,8 @@ export function StatsScreen() {
                 Foco nos últimos 7 dias
               </h2>
               <p className="text-obsidian-500 text-xs mb-3">
-                Quanto mais alta, mais você focou naquele dia.
+                Cada dia é uma estação — quanto mais alta a barra, mais você
+                focou.
               </p>
               <FocusWeekChart
                 history={history}

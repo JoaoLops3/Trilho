@@ -7,6 +7,7 @@ import { AppLogo } from "../components/AppLogo";
 import { AuthFormField } from "../components/AuthFormField";
 import { ButtonWithLoading } from "../components/ButtonWithLoading";
 import { GenericErrorState } from "../components/GenericErrorState";
+import { RailMark } from "../components/RailMark";
 import { useAuth } from "../lib/auth-context";
 import { useAsyncAction } from "../hooks/useAsyncAction";
 import { useKeyboardInset } from "../hooks/useKeyboardInset";
@@ -211,6 +212,7 @@ export function LoginScreen() {
               >
                 <AppLogo size={64} />
               </motion.div>
+              <RailMark className="mx-auto mb-4 w-24" tone="mint" sleeperCount={5} />
               <h1 className="font-display font-bold text-3xl text-white tracking-tight">
                 {APP_NAME}
               </h1>

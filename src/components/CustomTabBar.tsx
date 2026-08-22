@@ -69,9 +69,12 @@ function TabButton({
           initial={{ scale: 0 }}
           animate={{ scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="absolute -top-1 w-1 h-1 rounded-full bg-mint-400"
+          className="absolute -top-1 flex flex-col gap-[2px]"
           aria-hidden="true"
-        />
+        >
+          <span className="block h-[1.5px] w-3 rounded-full bg-mint-400" />
+          <span className="block h-[1.5px] w-3 rounded-full bg-mint-400/70" />
+        </motion.div>
       )}
     </motion.button>
   );
