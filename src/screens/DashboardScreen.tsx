@@ -89,9 +89,7 @@ export function DashboardScreen() {
 
   const today = dayKey();
   const upcomingTasks = sortByScheduledTime(
-    tasks.filter(
-      (t) => t.status === "pending" && taskDay(t, today) === today,
-    ),
+    tasks.filter((t) => t.status === "pending" && taskDay(t, today) === today),
   );
   // Sem scroll: mostra até 3 próximas na home.
   const visibleUpcoming = upcomingTasks.slice(0, 3);

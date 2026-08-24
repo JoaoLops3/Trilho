@@ -82,6 +82,8 @@ Diferenciais:
 
 - ESLint 9 + `typescript-eslint`
 - `tsc --noEmit` no pipeline de build
+- Vitest — 141 testes unitários em `src/lib` e hooks
+- Guardrails em CI (`scripts/validate-*.mjs`) — sync, auth, RLS, tokens, segurança, feedback de UI, identidade Trilho
 
 ## Estrutura do projeto
 
@@ -112,7 +114,7 @@ Trilho/
 
 ## Pré-requisitos
 
-- **Node.js 20.x** (fixado em `.nvmrc` e em `engines` do `package.json`)
+- **Node.js 24.x** (fixado em `.nvmrc` e em `engines` do `package.json`)
 - **npm**
 - **Xcode** — apenas para build/execução iOS (`npm run cap:ios`)
 - **Conta [Supabase](https://supabase.com/)** — login, cadastro e sync; o app funciona localmente sem ela, mas as telas de auth dependem das variáveis de ambiente
@@ -148,6 +150,8 @@ npm run build          # typecheck + build de produção
 npm run preview        # preview do build
 npm run lint           # ESLint
 npm run typecheck      # checagem de tipos
+npm run test           # suite completa (Vitest + guardrails)
+npm run test:unit      # só testes unitários (Vitest)
 npm run cap:sync       # build + sync dos assets com o projeto iOS
 npm run cap:ios        # sync e abre no Xcode
 npm run cap:open:ios   # abre o projeto iOS no Xcode
@@ -169,28 +173,35 @@ Para iOS: após `npm run cap:ios`, selecione um simulador ou dispositivo no Xcod
 
 **Validação no boot:** `src/lib/env.ts` valida todas as variáveis `VITE_*` com Zod na inicialização. `VITE_SUPABASE_URL` e `VITE_SUPABASE_ANON_KEY` devem estar **ambas** definidas ou **ambas** ausentes — se só uma estiver presente, o app loga o erro em dev e opera em **modo offline-only** (sem sync/conta), sem crash. PostHog e `VITE_APP_URL` são opcionais.
 
-## Roadmap
+## Status e roadmap
 
-Desenvolvimento por fases em [`.cursor/plans/ROADMAP.md`](.cursor/plans/ROADMAP.md). Status resumido:
+Desenvolvimento por fases em [`.cursor/plans/ROADMAP.md`](.cursor/plans/ROADMAP.md).
 
-- **Fases 1–10** — persistência local, CRUD de tarefas, timer, estatísticas, Agenda, notificações in-app e nativas, avatar, performance.
-- **Fase 11 — Conta e sync (Supabase)** — schema com RLS, autenticação, sync multi-dispositivo. Pendente: push remoto (Edge Functions / FCM / APNs) e ícones customizados de notificação.
-- **Fase 12 — Rotinas prontas / onboarding** — templates de rotina no primeiro uso (estudos, trabalho, saúde), pensados para TDAH.
-- **Fase 13 — Agenda semanal** — visão da semana completa.
-- **Fase 14 (futuro) — Rotina adaptativa** — sugestão de agenda com base no histórico real (PostHog + Supabase).
+**Estado atual:** núcleo do produto concluído na `main` — app funcional em web e iOS (Capacitor), com sync Supabase, onboarding de rotinas, estados de UI/a11y e identidade visual Trilho. Próximo gate relevante: publicação na App Store; lacunas opcionais na Fase 11.3 (push remoto).
+
+| Fase | Status | Resumo |
+| :--- | :--- | :--- |
+| **1–10** | Concluída | Persistência local, CRUD, timer, stats reais, agenda, notificações, avatar, performance |
+| **11.1–11.2** | Concluída | Schema Supabase + RLS, auth, perfil, privacidade PostHog |
+| **11.3** | Quase completa | Sync multi-dispositivo local ↔ nuvem; pendente push remoto (FCM/APNs) |
+| **11.5** | Concluída | Skeletons, toasts, error boundaries, offline banner, a11y WCAG AA |
+| **12** | Concluída | Onboarding de rotinas prontas (TDAH-friendly) |
+| **13** | Próxima | Agenda semanal |
+| **14** | Futuro | Rotina adaptativa com histórico (PostHog + Supabase) |
 
 ## Contribuição
 
 1. Faça um fork do repositório
 2. Crie uma branch (`git checkout -b feat/minha-feature`)
 3. Siga os padrões do projeto (ESLint, TypeScript estrito, Conventional Commits: `feat:`, `fix:`, `docs:`)
-4. Rode `npm run lint` e `npm run typecheck` antes do PR
+4. Rode `npm run lint`, `npm run typecheck` e `npm run test` antes do PR
 5. Abra um Pull Request descrevendo a mudança e o motivo
 
 ## Autor
 
 **João Lopes**
 
+- Repositório: [github.com/JoaoLops3/Trilho](https://github.com/JoaoLops3/Trilho)
 - GitHub: [@JoaoLops3](https://github.com/JoaoLops3)
 - LinkedIn: [João Gabriel Aguiar](https://www.linkedin.com/in/joaogabrielaguiar/)
 

@@ -212,7 +212,11 @@ export function LoginScreen() {
               >
                 <AppLogo size={64} />
               </motion.div>
-              <RailMark className="mx-auto mb-4 w-24" tone="mint" sleeperCount={5} />
+              <RailMark
+                className="mx-auto mb-4 w-24"
+                tone="mint"
+                sleeperCount={5}
+              />
               <h1 className="font-display font-bold text-3xl text-white tracking-tight">
                 {APP_NAME}
               </h1>

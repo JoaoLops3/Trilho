@@ -76,8 +76,13 @@ function GhostRoutineCard({ ghost }: { ghost: GhostRoutine }) {
 }
 
 export function AgendaScreen() {
-  const { tasks, changeStatus, editTask, deleteTask, setCreateTaskDatePrefill } =
-    useTasks();
+  const {
+    tasks,
+    changeStatus,
+    editTask,
+    deleteTask,
+    setCreateTaskDatePrefill,
+  } = useTasks();
   const { routines } = useRoutines();
   const location = useLocation();
   const today = dayKey();

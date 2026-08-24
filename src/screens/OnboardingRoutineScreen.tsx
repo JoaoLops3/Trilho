@@ -2,7 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { motion } from "../lib/motion";
 import { IonPage, IonContent } from "@ionic/react";
 import { useHistory } from "react-router-dom";
-import { Check, ChevronLeft, Clock, Pencil, Plus, RotateCcw, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  Clock,
+  Pencil,
+  Plus,
+  RotateCcw,
+  Trash2,
+} from "lucide-react";
 import { OrbBackground } from "../components/OrbBackground";
 import { NewTaskSheet } from "../components/NewTaskSheet";
 import { useRoutines } from "../lib/routines-context";
@@ -113,10 +121,18 @@ function toDraftRoutine(
 }
 
 /** Conteúdo no topo do espaço livre (sem vão artificial); botão no rodapé. */
-function StepBody({ children, footer }: { children: React.ReactNode; footer: React.ReactNode }) {
+function StepBody({
+  children,
+  footer,
+}: {
+  children: React.ReactNode;
+  footer: React.ReactNode;
+}) {
   return (
     <div className="flex flex-1 flex-col">
-      <div className="flex flex-1 flex-col justify-start pt-2 pb-4">{children}</div>
+      <div className="flex flex-1 flex-col justify-start pt-2 pb-4">
+        {children}
+      </div>
       <div className="shrink-0 pt-4 pb-2">{footer}</div>
     </div>
   );
@@ -134,9 +150,7 @@ export function OnboardingRoutineScreen() {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const isAdditive =
-    hasSeenRoutineOnboarding() ||
-    routines.length > 0 ||
-    tasks.length > 0;
+    hasSeenRoutineOnboarding() || routines.length > 0 || tasks.length > 0;
 
   useEffect(() => {
     captureEvent("routine onboarding viewed", {
@@ -527,7 +541,9 @@ export function OnboardingRoutineScreen() {
                     <button
                       type="button"
                       onClick={handleConfirm}
-                      disabled={previewItems.length === 0 || dedupe.freshCount === 0}
+                      disabled={
+                        previewItems.length === 0 || dedupe.freshCount === 0
+                      }
                       className="btn-primary w-full disabled:cursor-not-allowed disabled:opacity-70 touch-manipulation"
                     >
                       {dedupe.freshCount > 0 && dedupe.duplicateCount > 0
