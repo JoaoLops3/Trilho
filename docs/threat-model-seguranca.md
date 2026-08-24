@@ -9,25 +9,25 @@ Documento de regressão para segurança **nota 10** — o que protegemos, de que
 
 ## Ativos
 
-| Ativo | Onde vive | Sensibilidade |
-|-------|-----------|---------------|
-| Tarefas, rotinas, histórico | `localStorage` (guest) + Postgres (conta) | Alta — conteúdo pessoal |
-| Perfil (nome, avatar, meta) | Idem | Média |
-| JWT / refresh token | Keychain/Keystore (nativo), localStorage (web dev) | Crítica |
-| Chave anon Supabase | Bundle `VITE_*` | Baixa (pública by design) |
-| Consentimento analytics | `localStorage` | Baixa |
-| Eventos PostHog | Servidor PostHog (com consentimento) | Média — sem PII de tarefa |
+| Ativo                       | Onde vive                                          | Sensibilidade             |
+| --------------------------- | -------------------------------------------------- | ------------------------- |
+| Tarefas, rotinas, histórico | `localStorage` (guest) + Postgres (conta)          | Alta — conteúdo pessoal   |
+| Perfil (nome, avatar, meta) | Idem                                               | Média                     |
+| JWT / refresh token         | Keychain/Keystore (nativo), localStorage (web dev) | Crítica                   |
+| Chave anon Supabase         | Bundle `VITE_*`                                    | Baixa (pública by design) |
+| Consentimento analytics     | `localStorage`                                     | Baixa                     |
+| Eventos PostHog             | Servidor PostHog (com consentimento)               | Média — sem PII de tarefa |
 
 ---
 
 ## Atores
 
-| Ator | Capacidade | Objetivo típico |
-|------|------------|-----------------|
-| Usuário legítimo | App instalado, conta própria | Usar rotina |
-| Anon com anon key | PostgREST + Auth API públicas | Ler/escrever **só** dados próprios (RLS) |
-| Atacante com device físico | Ler storage não criptografado (guest) | Extrair tarefas locais |
-| Atacante remoto | Phishing, link malicioso, XSS | Roubar sessão ou injetar UI |
+| Ator                       | Capacidade                            | Objetivo típico                          |
+| -------------------------- | ------------------------------------- | ---------------------------------------- |
+| Usuário legítimo           | App instalado, conta própria          | Usar rotina                              |
+| Anon com anon key          | PostgREST + Auth API públicas         | Ler/escrever **só** dados próprios (RLS) |
+| Atacante com device físico | Ler storage não criptografado (guest) | Extrair tarefas locais                   |
+| Atacante remoto            | Phishing, link malicioso, XSS         | Roubar sessão ou injetar UI              |
 
 ---
 
@@ -55,30 +55,31 @@ Documento de regressão para segurança **nota 10** — o que protegemos, de que
 
 ## STRIDE (resumo)
 
-| Categoria | Ameaça | Mitigação atual |
-|-----------|--------|-----------------|
-| **S** Spoofing | Login com credencial alheia | GoTrue + RLS; JWT em Keychain nativo |
-| **T** Tampering | Escrever tarefa de outro user | RLS `user_id = auth.uid()` |
-| **R** Repudiation | Negar ação | Fora do escopo MVP (sem audit log app) |
-| **I** Info disclosure | Vazar `error.message` auth | `mapAuthError` → copy PT genérica |
-| **I** Info disclosure | PII em PostHog | `taskAnalyticsProps` sem título |
-| **D** DoS | Abuse Auth API | Rate limit GoTrue; client valida input |
-| **E** Elevation | service_role no bundle | Guardrail `test:security`; só anon no client |
+| Categoria             | Ameaça                        | Mitigação atual                                                                                                           |
+| --------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **S** Spoofing        | Login com credencial alheia   | GoTrue + RLS; JWT em Keychain nativo                                                                                      |
+| **T** Tampering       | Escrever tarefa de outro user | RLS `user_id = auth.uid()`                                                                                                |
+| **R** Repudiation     | Negar ação                    | Fora do escopo MVP (sem audit log app)                                                                                    |
+| **I** Info disclosure | Vazar `error.message` auth    | `mapAuthError` → copy PT genérica                                                                                         |
+| **I** Info disclosure | PII em PostHog                | `taskAnalyticsProps` sem título                                                                                           |
+| **D** DoS             | Abuse Auth API                | Rate limit GoTrue (por IP) + rate limit client (`auth-rate-limit.ts` — cooldown por operação/e-mail); client valida input |
+| **E** Elevation       | service_role no bundle        | Guardrail `test:security`; só anon no client                                                                              |
 
 ---
 
 ## Controles verificáveis (CI)
 
-| Controle | Como verificar |
-|----------|----------------|
-| Env boot | `npm run test:env` |
-| Guardrails segurança | `npm run test:security` |
-| Storage Zod | `npm run test:storage` |
-| Logout wipe | `npm run test:auth` |
-| RLS initplan | `npm run test:rls` |
-| Secrets no git | `.github/workflows/secret-scan.yml` |
-| Deps prod HIGH+ | CI `npm audit --production --audit-level=high` |
-| Deep link inválido | `auth-deeplink.test.ts` + doc em `supabase-auth-production.md` |
+| Controle                  | Como verificar                                                 |
+| ------------------------- | -------------------------------------------------------------- |
+| Env boot                  | `npm run test:env`                                             |
+| Guardrails segurança      | `npm run test:security`                                        |
+| Storage Zod               | `npm run test:storage`                                         |
+| Logout wipe               | `npm run test:auth`                                            |
+| RLS initplan              | `npm run test:rls`                                             |
+| Secrets no git            | `.github/workflows/secret-scan.yml`                            |
+| Deps prod HIGH+           | CI `npm audit --production --audit-level=high`                 |
+| Deep link inválido        | `auth-deeplink.test.ts` + doc em `supabase-auth-production.md` |
+| Rate limit auth no client | `auth-rate-limit.test.ts` + guardrail em `test:security`       |
 
 ---
 
@@ -87,7 +88,7 @@ Documento de regressão para segurança **nota 10** — o que protegemos, de que
 - App Store Connect / Nutrition Labels (gate futuro)
 - Supabase Pro / HaveIBeenPwned (pago)
 - Pentest externo contratado
-- WAF / rate limit próprio na borda
+- WAF na borda (rate limit próprio já coberto no client via `auth-rate-limit.ts` + GoTrue por IP)
 - Certificate pinning
 - Edge Functions (ainda não existem)
 

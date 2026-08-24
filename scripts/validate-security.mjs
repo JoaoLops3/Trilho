@@ -112,6 +112,24 @@ describe("security — módulos críticos", () => {
   it("observability.ts — surface storage", () => {
     assert.match(read("src/lib/observability.ts"), /"storage"/);
   });
+
+  it("auth-context.tsx — rate limit client em todas as operações de auth", () => {
+    const authContext = read("src/lib/auth-context.tsx");
+    assert.match(authContext, /from "\.\/auth-rate-limit"/);
+    assert.match(authContext, /consumeAuthAttempt/);
+    for (const operation of [
+      "sign_in",
+      "sign_up",
+      "reset_password",
+      "update_password",
+    ]) {
+      assert.match(
+        authContext,
+        new RegExp(`checkAuthRateLimit\\("${operation}"`),
+        `auth-context deve aplicar rate limit em ${operation}`,
+      );
+    }
+  });
 });
 
 describe("security — repo e CI", () => {

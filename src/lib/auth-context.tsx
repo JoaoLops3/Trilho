@@ -9,6 +9,12 @@ import {
 } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { mapAuthErrorWithTelemetry } from "./auth-errors";
+import {
+  clearAuthAttempts,
+  consumeAuthAttempt,
+  formatRateLimitError,
+  type AuthRateLimitOperation,
+} from "./auth-rate-limit";
 import { getAuthRedirectPath } from "./app-url";
 import {
   clearAuthParamsFromUrl,
@@ -65,6 +71,16 @@ function getDisplayNameFromUser(user: User): string | null {
   if (typeof raw !== "string") return null;
   const trimmed = raw.trim();
   return trimmed.length > 0 ? trimmed : null;
+}
+
+/** Retorna copy de cooldown se a operação estourou o rate limit local. */
+function checkAuthRateLimit(
+  operation: AuthRateLimitOperation,
+  key: string,
+): string | null {
+  const result = consumeAuthAttempt(operation, key);
+  if (result.ok) return null;
+  return formatRateLimitError(result.retryAfterMs);
 }
 
 async function ensureProfileRow(user: User): Promise<void> {
@@ -176,10 +192,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: "Conta na nuvem não configurada neste ambiente." };
       }
 
+      const rateLimitError = checkAuthRateLimit("sign_in", email);
+      if (rateLimitError) return { error: rateLimitError };
+
       const { error } = await supabase.auth.signInWithPassword({
         email: email.trim(),
         password,
       });
+
+      if (!error) {
+        clearAuthAttempts("sign_in", email);
+      }
 
       return { error: mapAuthErrorWithTelemetry(error, "sign_in") };
     },
@@ -198,6 +221,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           error: "Conta na nuvem não configurada neste ambiente.",
           needsEmailConfirmation: false,
         };
+      }
+
+      const rateLimitError = checkAuthRateLimit("sign_up", email);
+      if (rateLimitError) {
+        return { error: rateLimitError, needsEmailConfirmation: false };
       }
 
       const trimmedName = displayName.trim();
@@ -282,6 +310,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { error: "Conta na nuvem não configurada neste ambiente." };
       }
 
+      const rateLimitError = checkAuthRateLimit("reset_password", email);
+      if (rateLimitError) return { error: rateLimitError };
+
       const { error } = await supabase.auth.resetPasswordForEmail(
         email.trim(),
         {
@@ -301,6 +332,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (!supabase) {
         return { error: "Conta na nuvem não configurada neste ambiente." };
       }
+
+      // Sem e-mail disponível aqui — cooldown por sessão do device.
+      const rateLimitError = checkAuthRateLimit("update_password", "session");
+      if (rateLimitError) return { error: rateLimitError };
 
       const { error } = await supabase.auth.updateUser({ password });
       if (error) {
